@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>會員名錄｜BNI 金貴分會</title>
+<meta name="description" content="BNI台南金貴分會會員名錄，依行業分類查詢，找到值得信任的商務夥伴。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <a href="index.html" class="brand">
+      <span class="en">GINGUI</span><span class="zh">｜BNI 金貴分會</span>
+    </a>
+    <ul>
+      <li><a href="index.html">首頁</a></li>
+      <li><a href="join.html">來賓報名</a></li>
+      <li><a href="directory.html" class="active">會員名錄</a></li>
+    </ul>
+    <a href="join.html" class="cta">預約蒞臨</a>
+  </div>
+</nav>
+
+<section class="hero" style="padding:64px 0 48px">
+  <div class="wrap">
+    <span class="tag">MEMBER DIRECTORY</span>
+    <h1>認識<span class="gold">金貴</span>的夥伴們</h1>
+    <p class="lead">
+      每個行業僅開放一位代表——這是一份值得信任、隨時能找到人的商務名單。
+      需要哪個領域的協助，直接搜尋或篩選行業別即可。
+    </p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="dir-toolbar">
+      <input type="text" id="q" placeholder="搜尋姓名或行業…">
+      <select id="cat">
+        <option value="">全部行業</option>
+      </select>
+    </div>
+
+    <div style="overflow-x:auto">
+      <table class="dir" id="dirTable">
+        <thead>
+          <tr>
+            <th>姓名</th>
+            <th>行業別</th>
+            <th>聯絡電話</th>
+            <th>公司</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- v1 佔位資料：待呱哥提供完整會員名單後替換為真實資料 -->
+          <tr data-cat="法律">
+            <td class="name">〔姓名〕</td>
+            <td><span class="badge-cat">法律服務</span></td>
+            <td class="phone">〔電話〕</td>
+            <td>〔公司名稱〕</td>
+          </tr>
+          <tr data-cat="會計">
+            <td class="name">〔姓名〕</td>
+            <td><span class="badge-cat">會計記帳</span></td>
+            <td class="phone">〔電話〕</td>
+            <td>〔公司名稱〕</td>
+          </tr>
+          <tr data-cat="保險">
+            <td class="name">〔姓名〕</td>
+            <td><span class="badge-cat">保險顧問</span></td>
+            <td class="phone">〔電話〕</td>
+            <td>〔公司名稱〕</td>
+          </tr>
+          <tr data-cat="房仲">
+            <td class="name">〔姓名〕</td>
+            <td><span class="badge-cat">不動產</span></td>
+            <td class="phone">〔電話〕</td>
+            <td>〔公司名稱〕</td>
+          </tr>
+          <tr data-cat="行銷">
+            <td class="name">〔姓名〕</td>
+            <td><span class="badge-cat">行銷設計</span></td>
+            <td class="phone">〔電話〕</td>
+            <td>〔公司名稱〕</td>
+          </tr>
+          <tr data-cat="餐飲">
+            <td class="name">〔姓名〕</td>
+            <td><span class="badge-cat">餐飲業</span></td>
+            <td class="phone">〔電話〕</td>
+            <td>〔公司名稱〕</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:20px;color:var(--gray-70);font-size:.88rem">
+      ※ 以上為版面示意用佔位資料，尚未填入真實會員資訊。正式上線前需替換為完整會員名單
+      （姓名、行業別、公司、聯絡電話），並經每位會員本人同意公開聯絡電話後才可上線。
+    </p>
+  </div>
+</section>
+
+<footer>
+  <hr class="gold-line">
+  <div class="wrap">
+    <div>© <span id="year"></span> BNI 台南金貴分會</div>
+    <div>
+      <a href="index.html">首頁</a> ・
+      <a href="join.html">來賓報名</a>
+    </div>
+  </div>
+</footer>
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+
+const rows = Array.from(document.querySelectorAll('#dirTable tbody tr'));
+const cats = [...new Set(rows.map(r => r.dataset.cat))].sort();
+const catSelect = document.getElementById('cat');
+cats.forEach(c => {
+  const opt = document.createElement('option');
+  opt.value = c; opt.textContent = c;
+  catSelect.appendChild(opt);
+});
+
+function applyFilter(){
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  const cat = catSelect.value;
+  rows.forEach(r => {
+    const text = r.textContent.toLowerCase();
+    const matchQ = !q || text.includes(q);
+    const matchCat = !cat || r.dataset.cat === cat;
+    r.style.display = (matchQ && matchCat) ? '' : 'none';
+  });
+}
+document.getElementById('q').addEventListener('input', applyFilter);
+catSelect.addEventListener('change', applyFilter);
+</script>
+</body>
+</html>
