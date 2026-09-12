@@ -219,3 +219,13 @@ footer .gold-line{
   background:linear-gradient(0deg,rgba(0,0,0,.7),transparent);
   color:#fff;font-size:.88rem;
 }
+
+/* ---------- Success stories ---------- */
+.story-card{
+  background:var(--white);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);
+  border:1px solid #eee5d8;border-left:4px solid var(--gingui-gold);
+}
+.story-card .quote{font-size:1.02rem;color:var(--ink);line-height:1.8;margin:0 0 14px}
+.story-card .quote::before{content:"“";color:var(--gingui-gold);font-size:1.4em;line-height:0;vertical-align:-0.2em}
+.story-card .who{font-size:.88rem;color:var(--gray-70);font-weight:700}
+.story-card .who small{display:block;font-weight:400;color:var(--gray-50);margin-top:2px}
