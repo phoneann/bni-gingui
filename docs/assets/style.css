@@ -294,3 +294,10 @@ footer .gold-line{
 }
 .chair-chip .name{font-weight:700;font-size:.95rem}
 .chair-chip .ind{color:var(--gray-70);font-size:.82rem}
+
+/* ---------- Gold medal members ---------- */
+.gold-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+@media (max-width:760px){.gold-grid{grid-template-columns:1fr}}
+.gold-card{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid #eee5d8}
+.gold-card img{width:100%;display:block}
+.gold-card.wide{grid-column:1/-1}
