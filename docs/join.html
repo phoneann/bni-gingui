@@ -97,22 +97,59 @@
     <ul class="info-list">
       <li>
         <span class="label">接待窗口</span>
-        <span class="value"><span class="placeholder">〔待填：接待窗口姓名／職稱〕</span></span>
+        <span class="value">謝豐安（Isaac）</span>
       </li>
       <li>
         <span class="label">聯絡電話</span>
-        <span class="value"><span class="placeholder">〔待填：電話〕</span></span>
+        <span class="value">0955-468352</span>
       </li>
       <li>
-        <span class="label">LINE／Email</span>
-        <span class="value"><span class="placeholder">〔待填：LINE官方帳號或Email〕</span></span>
+        <span class="label">Email</span>
+        <span class="value">phoneann@gmail.com</span>
       </li>
     </ul>
+
+    <form class="guest-form" id="guestForm" action="https://formsubmit.co/phoneann@gmail.com" method="POST">
+      <input type="hidden" name="_subject" value="【金貴分會官網】來賓報名">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_next" value="https://phoneann.github.io/bni-gingui/join.html?sent=1">
+      <input type="text" name="_honey" class="honey" tabindex="-1" autocomplete="off">
+      <div class="field">
+        <label for="g-name">姓名 *</label>
+        <input type="text" id="g-name" name="姓名" required>
+      </div>
+      <div class="field">
+        <label for="g-industry">行業別 *</label>
+        <input type="text" id="g-industry" name="行業別" required>
+      </div>
+      <div class="field">
+        <label for="g-contact">聯絡方式（手機或LINE ID） *</label>
+        <input type="text" id="g-contact" name="聯絡方式" required>
+      </div>
+      <div class="field">
+        <label for="g-date">預計蒞臨日期</label>
+        <input type="date" id="g-date" name="預計蒞臨日期">
+      </div>
+      <div class="field">
+        <label for="g-note">備註（想了解什麼、飲食習慣等）</label>
+        <textarea id="g-note" name="備註" rows="3"></textarea>
+      </div>
+      <button type="submit" class="btn btn-red" style="border:none;cursor:pointer;width:100%">送出報名</button>
+    </form>
+    <p id="sentMsg" hidden style="margin-top:16px;color:var(--bni-red);font-weight:700">
+      已收到你的資料，接待窗口會盡快跟你聯絡！
+    </p>
+
     <p style="margin-top:24px;color:var(--gray-70);font-size:.9rem">
-      ※ v1 版本先以聯絡窗口人工確認方式蒞臨登記；若人數穩定成長，可再評估加上線上表單。
+      ※ 表單送出後會直接寄到接待窗口信箱；第一次啟用需要接待窗口本人到信箱點擊 FormSubmit 的確認連結。
     </p>
   </div>
 </section>
+<script>
+if (new URLSearchParams(location.search).get('sent') === '1') {
+  document.getElementById('sentMsg').hidden = false;
+}
+</script>
 
 <footer>
   <hr class="gold-line">
