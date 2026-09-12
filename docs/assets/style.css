@@ -229,3 +229,23 @@ footer .gold-line{
 .story-card .quote::before{content:"“";color:var(--gingui-gold);font-size:1.4em;line-height:0;vertical-align:-0.2em}
 .story-card .who{font-size:.88rem;color:var(--gray-70);font-weight:700}
 .story-card .who small{display:block;font-weight:400;color:var(--gray-50);margin-top:2px}
+
+/* ---------- Weekly presentation invite card ---------- */
+.focus-strip{background:#f2ede5;padding:56px 0}
+.focus-card{
+  display:grid;grid-template-columns:280px 1fr;gap:0;
+  background:var(--white);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);
+  border:1px solid #eee5d8;
+}
+@media (max-width:760px){.focus-card{grid-template-columns:1fr}}
+.focus-card .poster{
+  background:linear-gradient(160deg,#161513,#1f1c19);
+  display:flex;align-items:center;justify-content:center;min-height:220px;
+  color:var(--gingui-gold);
+}
+.focus-card .poster img{width:100%;height:100%;object-fit:cover}
+.focus-card .body{padding:28px 32px}
+.focus-card .week{font-size:.8rem;letter-spacing:.1em;color:var(--bni-red);font-weight:700;text-transform:uppercase;margin-bottom:8px}
+.focus-card h3{margin:0 0 10px;font-size:1.3rem}
+.focus-card .speaker{color:var(--gray-90);margin-bottom:16px}
+.focus-card .speaker b{color:var(--ink)}
