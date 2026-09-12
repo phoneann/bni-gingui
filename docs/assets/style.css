@@ -281,3 +281,16 @@ footer .gold-line{
 .story-featured .quote b{color:var(--bni-red)}
 .story-featured .source{font-size:.82rem;color:var(--gray-70)}
 .story-featured .source a{color:var(--bni-red);text-decoration:underline}
+
+/* ---------- Past Chairs timeline ---------- */
+.chairs-list{display:flex;flex-wrap:wrap;gap:14px}
+.chair-chip{
+  background:var(--white);border:1px solid #eee5d8;border-radius:999px;
+  padding:10px 20px 10px 10px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow);
+}
+.chair-chip .term{
+  background:linear-gradient(120deg,var(--gold-start),var(--gold-end));color:var(--black);
+  font-weight:700;font-size:.82rem;padding:4px 12px;border-radius:999px;white-space:nowrap;
+}
+.chair-chip .name{font-weight:700;font-size:.95rem}
+.chair-chip .ind{color:var(--gray-70);font-size:.82rem}
