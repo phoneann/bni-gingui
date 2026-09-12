@@ -46,6 +46,7 @@ a{color:inherit;text-decoration:none}
 .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
 .nav .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.04em}
 .nav .brand img.bni-logo{height:34px;width:auto}
+.nav .brand img.gingui-logo{height:38px;width:auto}
 .nav .brand .divider{width:1px;height:20px;background:rgba(255,255,255,.25)}
 .nav .brand .en{
   font-family:"Archive","Noto Sans TC",sans-serif;
@@ -65,8 +66,11 @@ a{color:inherit;text-decoration:none}
 /* ---------- Hero (黑底＋漸層金) ---------- */
 .hero{
   background:
-    radial-gradient(1200px 500px at 15% -10%, rgba(213,183,138,.18), transparent 60%),
-    linear-gradient(180deg,#161513,#1f1c19);
+    radial-gradient(1200px 500px at 15% -10%, rgba(213,183,138,.14), transparent 60%),
+    linear-gradient(100deg, rgba(22,21,19,.94) 0%, rgba(22,21,19,.88) 40%, rgba(22,21,19,.55) 100%),
+    url("assets/photos/hero-convention.jpg");
+  background-size: cover;
+  background-position: center 30%;
   color:var(--white);
   padding:88px 0 72px;
 }
