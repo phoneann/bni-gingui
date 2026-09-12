@@ -45,7 +45,7 @@ a{color:inherit;text-decoration:none}
 }
 .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
 .nav .brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.04em}
-.nav .brand img.bni-logo{height:22px;width:auto;background:var(--white);padding:3px 6px;border-radius:4px}
+.nav .brand img.bni-logo{height:34px;width:auto}
 .nav .brand .divider{width:1px;height:20px;background:rgba(255,255,255,.25)}
 .nav .brand .en{
   font-family:"Archive","Noto Sans TC",sans-serif;
@@ -165,7 +165,7 @@ table.dir td.phone{white-space:nowrap;color:var(--gray-90)}
 .values-strip .bni-badge{
   display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;
 }
-.values-strip .bni-badge img{height:20px;background:var(--white);padding:2px 5px;border-radius:3px}
+.values-strip .bni-badge img{height:32px;width:auto}
 .values-strip .bni-badge span{color:#cfc9bf;font-size:.85rem;letter-spacing:.06em}
 .values-list{display:flex;flex-wrap:wrap;gap:12px;margin-top:20px}
 .value-chip{
