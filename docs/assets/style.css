@@ -68,7 +68,7 @@ a{color:inherit;text-decoration:none}
   background:
     radial-gradient(1200px 500px at 15% -10%, rgba(213,183,138,.14), transparent 60%),
     linear-gradient(100deg, rgba(22,21,19,.80) 0%, rgba(22,21,19,.60) 45%, rgba(22,21,19,.22) 100%),
-    url("assets/photos/hero-convention.jpg");
+    url("photos/hero-convention.jpg");
   background-size: cover;
   background-position: center 30%;
   color:var(--white);
