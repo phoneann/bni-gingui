@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://phoneann.github.io/bni-gingui/sitemap.xml
