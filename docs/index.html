@@ -31,6 +31,7 @@
     <ul>
       <li><a href="index.html" class="active">首頁</a></li>
       <li><a href="about.html">關於金貴</a></li>
+      <li><a href="videos.html">影音紀錄</a></li>
       <li><a href="faq.html">常見問題</a></li>
       <li><a href="join.html">來賓報名</a></li>
       <li><a href="directory.html">會員名錄</a></li>
@@ -57,11 +58,14 @@
 
 <section class="focus-strip">
   <div class="wrap">
-    <div class="kicker">RECENT SESSION</div>
-    <h2 style="margin-bottom:20px">近期主題簡報</h2>
-    <div class="focus-card">
-      <div class="poster">
+    <div class="kicker">THIS WEEK'S FEATURED SPEAKER</div>
+    <h2 style="margin-bottom:20px">本週主講</h2>
+    <div class="focus-card video-focus-card">
+      <div class="poster reel-frame" id="home-reel-20261016">
         <img src="assets/photos/focus-20261016.jpg" alt="10/16 主題簡報：乾淨「洗」以為常，黴菌無處可藏">
+        <button class="reel-load" type="button" data-reel-target="home-reel-20261016" data-facebook-url="https://www.facebook.com/reel/1583863446822476/" data-reel-title="陳令緯主講影片：乾淨洗以為常，黴菌無處可藏">
+          <span aria-hidden="true">▶</span> 播放主講影片
+        </button>
       </div>
       <div class="body">
         <div class="week">2026-10-16（五）06:30</div>
@@ -70,7 +74,11 @@
         <p style="color:var(--gray-90);font-size:.92rem">
           本週招募引薦：床墊沙發清洗業／毛巾床單送洗業／專做水塔水管清洗業；民宿或旅館業主／托嬰中心業主；50 台冷氣以上的企業總務或採購／產後護理之家／長照中心業主。
         </p>
-        <a href="join.html" class="btn btn-red" style="margin-top:12px;padding:10px 24px;font-size:.92rem">預約下次例會</a>
+        <p class="video-note">點擊左側影片即可在本站觀看；例會結束後，這支影片會保留在影音紀錄中。</p>
+        <div class="btns compact-btns">
+          <a href="join.html" class="btn btn-red">預約下次例會</a>
+          <a href="videos.html" class="btn btn-outline-dark">查看影音紀錄</a>
+        </div>
       </div>
     </div>
   </div>
@@ -183,6 +191,7 @@
     </div>
     <div>
       <a href="about.html">關於金貴</a> ・
+      <a href="videos.html">影音紀錄</a> ・
       <a href="faq.html">常見問題</a> ・
       <a href="join.html">來賓報名</a> ・
       <a href="directory.html">會員名錄</a> ・
@@ -191,5 +200,6 @@
   </div>
 </footer>
 <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+<script src="assets/reels.js"></script>
 </body>
 </html>
