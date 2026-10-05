@@ -11,6 +11,7 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,follow">
 <title>會員數位名片｜BNI 金貴分會</title>
 <meta name="description" content="認識 BNI 台南金貴分會會員的服務、適合引薦的需求與聯絡方式。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,6 +30,7 @@
     <ul>
       <li><a href="index.html">首頁</a></li>
       <li><a href="about.html">關於金貴</a></li>
+      <li><a href="videos.html">影音紀錄</a></li>
       <li><a href="faq.html">常見問題</a></li>
       <li><a href="join.html">來賓報名</a></li>
       <li><a href="directory.html" class="active">會員名錄</a></li>
@@ -49,6 +51,7 @@
         <div class="btns">
           <a id="contactButton" class="btn btn-gold" href="">直接聯絡</a>
           <a id="inviteButton" class="btn btn-outline" href="">由這位會員邀請參觀</a>
+          <button id="shareButton" class="btn btn-outline share-button" type="button">分享這張名片</button>
         </div>
       </div>
     </div>
@@ -115,7 +118,7 @@ const members = {
     services: ['彈簧與金屬線材加工需求討論', '依產品條件協助釐清規格與供應方向', '連結適合的製造與商務合作資源'],
     referrals: ['企業正在找彈簧、線材成形或相關零件供應', '新產品需要討論材料、規格或製造可行性', '傳產業者想尋找跨產業合作與商務連結'],
     evidence: '<strong>金貴創會及第 2 屆主席、雙金質獎章會員。</strong>金貴公開成功故事記錄：謝豐安透過既有人脈協助黃昭穎連結建商資源，促成 700 萬元防火門訂單。',
-    website: 'https://springgate.com.tw'
+    website: 'https://springgate.com.tw', sharePage: 'member-xiefengan.html'
   },
   huangzhaoying: {
     name: '黃昭穎', industry: '防火門業', company: '勝紘國際建材',
@@ -124,7 +127,7 @@ const members = {
     services: ['防火門與入戶門需求諮詢', '建案相關門類產品與服務討論', '依現場與專案條件確認合適方案'],
     referrals: ['建商、營造或設計端正在規劃防火門', '住宅或商用空間需要入戶門服務', '專案需要能持續溝通與配合的建材夥伴'],
     evidence: '<strong>金貴第 13 屆副主席。</strong>金貴公開成功故事記錄：透過分會夥伴謝豐安連結建商資源，促成 700 萬元防火門訂單。',
-    website: 'https://www.oakforest.com.tw/'
+    website: 'https://www.oakforest.com.tw/', sharePage: 'member-huangzhaoying.html'
   },
   chenlingwei: {
     name: '陳令緯', industry: '家電清洗業', company: '吾家有洗／宅淨優化',
@@ -133,7 +136,7 @@ const members = {
     services: ['住家家電清洗需求', '民宿、旅館與機構的清潔合作討論', '多台冷氣等企業型清洗需求評估'],
     referrals: ['民宿或旅館業主準備安排清潔', '托嬰、產後護理或長照單位重視環境維護', '企業總務或採購有多台冷氣清洗需求'],
     evidence: '<strong>金貴近期主題簡報講者。</strong>公開簡報主題為「乾淨『洗』以為常，黴菌無處可藏」，並列出民宿、企業總務、托嬰與長照等希望認識的合作對象。',
-    website: 'https://www.wash-mh.com/'
+    website: 'https://www.wash-mh.com/', sharePage: 'member-chenlingwei.html'
   },
   chenyixin: {
     name: '陳以昕', industry: '寢具業', company: '好眠時代企業社',
@@ -142,7 +145,7 @@ const members = {
     services: ['床墊與寢具選擇諮詢', '依個人睡眠需求討論合適方向', '居家睡眠環境相關產品服務'],
     referrals: ['搬新家、換房或準備更新床墊', '睡眠環境需要重新評估與調整', '企業或合作夥伴有寢具相關需求'],
     evidence: '<strong>金貴第 13 屆主席、金質獎章會員。</strong>也是金貴公開領導團隊與歷屆主席資料中的現任主席。',
-    website: ''
+    website: '', sharePage: 'member-chenyixin.html'
   },
   huangxiaohan: {
     name: '黃筱涵', industry: '清潔服務業', company: '永揚清潔有限公司',
@@ -151,7 +154,7 @@ const members = {
     services: ['居家與空間清潔需求', '依現場狀況討論清潔服務', '長期或階段性的環境維護合作'],
     referrals: ['居家空間需要專業清潔協助', '搬遷、整理或工程後需要清潔', '企業與合作單位需要環境維護資源'],
     evidence: '<strong>金貴第 13 屆秘書財務、第 9 屆主席、金質獎章會員。</strong>長期參與分會運作，相關經歷已公開於金貴介紹頁。',
-    website: 'https://hemusih.com/coatslip-cleaning/'
+    website: 'https://hemusih.com/coatslip-cleaning/', sharePage: 'member-huangxiaohan.html'
   }
 };
 
@@ -172,10 +175,20 @@ if (!member) {
   document.getElementById('memberPromise').textContent = member.promise;
   document.getElementById('memberCompany').innerHTML = member.website ? `<a href="${member.website}" target="_blank" rel="noopener">${member.company} ↗</a>` : member.company;
   document.getElementById('contactButton').href = `tel:${member.phone}`;
-  document.getElementById('contactButton').textContent = `電話聯絡 ${member.phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1-$2-$3')}`;
+  document.getElementById('contactButton').textContent = `電話聯絡 ${member.phone.replace(/(\d{4})(\d{6})/, '$1-$2')}`;
   const inviteUrl = `join.html?invited_by=${encodeURIComponent(member.name)}`;
   document.getElementById('inviteButton').href = inviteUrl;
   document.getElementById('bottomInvite').href = inviteUrl;
+  document.getElementById('shareButton').addEventListener('click', async () => {
+    const shareUrl = new URL(member.sharePage, location.href).href;
+    const shareData = {title: `${member.name}｜${member.industry}｜BNI 金貴分會`, text: member.promise, url: shareUrl};
+    if (navigator.share) {
+      try { await navigator.share(shareData); } catch (error) { if (error.name !== 'AbortError') alert('分享功能暫時無法使用，請複製目前網址。'); }
+    } else {
+      try { await navigator.clipboard.writeText(shareUrl); alert('名片連結已複製'); }
+      catch { alert(`請複製名片連結：${shareUrl}`); }
+    }
+  });
   document.getElementById('evidence').innerHTML = member.evidence;
   member.services.forEach(text => document.getElementById('serviceList').insertAdjacentHTML('beforeend', `<li>${text}</li>`));
   member.referrals.forEach(text => document.getElementById('referralList').insertAdjacentHTML('beforeend', `<li>${text}</li>`));

@@ -419,6 +419,7 @@ footer .gold-line{
 .member-photo{width:220px;height:220px;border-radius:50%;object-fit:cover;border:5px solid var(--gingui-gold);box-shadow:0 12px 32px rgba(0,0,0,.35)}
 .member-hero .tag{display:inline-block;color:var(--gingui-gold);border:1px solid rgba(208,183,138,.55);border-radius:999px;padding:6px 14px;font-size:.82rem;letter-spacing:.08em}
 .member-hero h1{font-size:clamp(2.2rem,5vw,3.5rem);margin:12px 0 6px}.member-promise{font-size:1.18rem;color:#e1ddd5;max-width:680px;margin:0 0 8px}.member-company{color:var(--gingui-gold);font-weight:700;margin:0 0 26px}.member-company a{border-bottom:1px solid rgba(208,183,138,.5)}
+.share-button{background:transparent;font-family:inherit;cursor:pointer}
 .profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}.profile-panel{background:#fff;border:1px solid #eee5d8;border-radius:var(--radius);padding:30px;box-shadow:var(--shadow)}.profile-panel h2{font-size:1.4rem}
 .check-list{list-style:none;padding:0;margin:20px 0 0;display:grid;gap:14px}.check-list li{position:relative;padding-left:30px;color:var(--gray-90)}.check-list li::before{content:'✓';position:absolute;left:0;top:0;color:var(--bni-red);font-weight:900}
 .evidence-box{max-width:820px;background:#fff;border-left:4px solid var(--gingui-gold);padding:24px 28px;border-radius:0 var(--radius) var(--radius) 0;box-shadow:var(--shadow);line-height:1.85}.profile-note{font-size:.84rem;color:var(--gray-70);margin-top:18px}

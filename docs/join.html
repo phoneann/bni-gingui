@@ -141,14 +141,7 @@
       </div>
       <div class="field">
         <label for="g-invited">邀請你的金貴會員</label>
-        <select id="g-invited" name="邀請會員">
-          <option value="自行報名">自行報名／不確定</option>
-          <option>謝豐安</option>
-          <option>黃昭穎</option>
-          <option>陳令緯</option>
-          <option>陳以昕</option>
-          <option>黃筱涵</option>
-        </select>
+        <input type="text" id="g-invited" name="邀請會員" placeholder="不知道可留白" maxlength="30">
         <small class="field-help">若你從會員的數位名片進入，系統會自動帶入邀請人。</small>
       </div>
       <div class="field">
@@ -181,12 +174,8 @@ if (params.get('sent') === '1') {
 }
 const invitedBy = params.get('invited_by');
 if (invitedBy) {
-  const select = document.getElementById('g-invited');
-  const option = Array.from(select.options).find(item => item.value === invitedBy);
-  if (option) {
-    select.value = invitedBy;
-    document.getElementById('g-source').value = `會員數位名片：${invitedBy}`;
-  }
+  document.getElementById('g-invited').value = invitedBy;
+  document.getElementById('g-source').value = `會員數位名片：${invitedBy}`;
 }
 </script>
 
