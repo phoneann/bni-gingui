@@ -17,7 +17,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/style.css?v=20261005b">
+<script src="assets/tracking.js?v=20261005b"></script>
 </head>
 <body>
 
@@ -50,8 +51,8 @@
       如果你正在尋找穩定、可長期經營的商務夥伴，歡迎以來賓身分蒞臨參觀。
     </p>
     <div class="btns">
-      <a href="join.html" class="btn btn-gold">我要以來賓身分報名</a>
-      <a href="directory.html" class="btn btn-outline">看看金貴有哪些夥伴</a>
+      <a href="join.html" class="btn btn-gold" data-track="guest_registration_click" data-track-label="首頁首屏報名">我要以來賓身分報名</a>
+      <a href="directory.html" class="btn btn-outline" data-track="directory_click" data-track-label="首頁首屏會員名錄">看看金貴有哪些夥伴</a>
     </div>
   </div>
 </section>
@@ -62,18 +63,18 @@
     <h2>你現在需要哪一種<span class="accent">專業協助</span>？</h2>
     <p class="desc">先從遇到的問題出發，不必先記住會員姓名。點選需求，就能查看金貴有哪些夥伴可以進一步認識。</p>
     <div class="need-grid">
-      <a class="need-card" href="directory.html?group=engineering"><span>🏗️</span><strong>工程與修繕</strong><small>裝修、門窗、防水、空調、鐵件</small></a>
-      <a class="need-card" href="directory.html?group=business"><span>💼</span><strong>企業經營</strong><small>財務、法務、品牌、行銷與規劃</small></a>
-      <a class="need-card" href="directory.html?group=wellness"><span>🌿</span><strong>健康與生活</strong><small>保健、清潔、美體、食品與寢具</small></a>
-      <a class="need-card" href="directory.html"><span>🤝</span><strong>查看全部夥伴</strong><small>搜尋姓名、公司或正式行業別</small></a>
+      <a class="need-card" href="directory.html?group=engineering" data-track="need_category_click" data-need-group="engineering"><span>🏗️</span><strong>工程與修繕</strong><small>裝修、門窗、防水、空調、鐵件</small></a>
+      <a class="need-card" href="directory.html?group=business" data-track="need_category_click" data-need-group="business"><span>💼</span><strong>企業經營</strong><small>財務、法務、品牌、行銷與規劃</small></a>
+      <a class="need-card" href="directory.html?group=wellness" data-track="need_category_click" data-need-group="wellness"><span>🌿</span><strong>健康與生活</strong><small>保健、清潔、美體、食品與寢具</small></a>
+      <a class="need-card" href="directory.html" data-track="need_category_click" data-need-group="all"><span>🤝</span><strong>查看全部夥伴</strong><small>搜尋姓名、公司或正式行業別</small></a>
     </div>
   </div>
 </section>
 
 <section class="focus-strip">
   <div class="wrap">
-    <div class="kicker">THIS WEEK'S FEATURED SPEAKER</div>
-    <h2 style="margin-bottom:20px">本週主講</h2>
+    <div class="kicker">UPCOMING FEATURED SPEAKER</div>
+    <h2 style="margin-bottom:20px">近期主講</h2>
     <div class="focus-card video-focus-card">
       <div class="poster reel-frame" id="home-reel-20261016">
         <img src="assets/photos/focus-20261016.jpg" alt="10/16 主題簡報：乾淨「洗」以為常，黴菌無處可藏">
@@ -90,7 +91,7 @@
         </p>
         <p class="video-note">點擊左側播放按鈕，會以直式完整畫面開啟影片；例會結束後，這支影片會保留在影音紀錄中。</p>
         <div class="btns compact-btns">
-          <a href="join.html" class="btn btn-red">預約下次例會</a>
+          <a href="join.html?meeting=2026-10-16" class="btn btn-red" data-track="guest_registration_click" data-track-label="近期主講報名">預約 10/16 例會</a>
           <a href="videos.html" class="btn btn-outline-dark">查看影音紀錄</a>
         </div>
       </div>

@@ -17,7 +17,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/style.css?v=20261005b">
+<script src="assets/tracking.js?v=20261005b"></script>
 </head>
 <body>
 <nav class="nav">
@@ -49,8 +50,8 @@
         <p id="memberPromise" class="member-promise"></p>
         <p id="memberCompany" class="member-company"></p>
         <div class="btns">
-          <a id="contactButton" class="btn btn-gold" href="">直接聯絡</a>
-          <a id="inviteButton" class="btn btn-outline" href="">由這位會員邀請參觀</a>
+          <a id="contactButton" class="btn btn-gold" href="" data-track="member_contact_click">直接聯絡</a>
+          <a id="inviteButton" class="btn btn-outline" href="" data-track="member_invite_click">由這位會員邀請參觀</a>
           <button id="shareButton" class="btn btn-outline share-button" type="button">分享這張名片</button>
         </div>
       </div>
@@ -88,7 +89,7 @@
         <h2>想認識這位會員，也想看看金貴怎麼合作？</h2>
         <p>用專屬連結報名，表單會自動帶入邀請人，接待窗口能更快完成後續安排。</p>
       </div>
-      <a id="bottomInvite" class="btn btn-red" href="">預約參觀金貴</a>
+      <a id="bottomInvite" class="btn btn-red" href="" data-track="member_invite_click">預約參觀金貴</a>
     </div>
   </section>
 </main>
@@ -159,7 +160,8 @@ const members = {
 };
 
 const params = new URLSearchParams(location.search);
-const member = members[params.get('id')];
+const memberId = params.get('id');
+const member = members[memberId];
 document.getElementById('year').textContent = new Date().getFullYear();
 
 if (!member) {
@@ -175,17 +177,21 @@ if (!member) {
   document.getElementById('memberPromise').textContent = member.promise;
   document.getElementById('memberCompany').innerHTML = member.website ? `<a href="${member.website}" target="_blank" rel="noopener">${member.company} ↗</a>` : member.company;
   document.getElementById('contactButton').href = `tel:${member.phone}`;
+  document.getElementById('contactButton').dataset.member = memberId;
   document.getElementById('contactButton').textContent = `電話聯絡 ${member.phone.replace(/(\d{4})(\d{6})/, '$1-$2')}`;
   const inviteUrl = `join.html?invited_by=${encodeURIComponent(member.name)}`;
   document.getElementById('inviteButton').href = inviteUrl;
+  document.getElementById('inviteButton').dataset.member = memberId;
   document.getElementById('bottomInvite').href = inviteUrl;
+  document.getElementById('bottomInvite').dataset.member = memberId;
+  window.ginguiTrack?.('member_profile_view', {member_id: memberId, member_industry: member.industry});
   document.getElementById('shareButton').addEventListener('click', async () => {
     const shareUrl = new URL(member.sharePage, location.href).href;
     const shareData = {title: `${member.name}｜${member.industry}｜BNI 金貴分會`, text: member.promise, url: shareUrl};
     if (navigator.share) {
-      try { await navigator.share(shareData); } catch (error) { if (error.name !== 'AbortError') alert('分享功能暫時無法使用，請複製目前網址。'); }
+      try { await navigator.share(shareData); window.ginguiTrack?.('member_share', {member_id: memberId, share_method: 'native'}); } catch (error) { if (error.name !== 'AbortError') alert('分享功能暫時無法使用，請複製目前網址。'); }
     } else {
-      try { await navigator.clipboard.writeText(shareUrl); alert('名片連結已複製'); }
+      try { await navigator.clipboard.writeText(shareUrl); window.ginguiTrack?.('member_share', {member_id: memberId, share_method: 'clipboard'}); alert('名片連結已複製'); }
       catch { alert(`請複製名片連結：${shareUrl}`); }
     }
   });

@@ -16,7 +16,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/style.css?v=20261005b">
+<script src="assets/tracking.js?v=20261005b"></script>
 </head>
 <body>
 
@@ -56,23 +57,23 @@
     <h2>先從「能幫你什麼」認識會員</h2>
     <p class="desc">先從 5 位會員的數位名片開始。每張名片都整理了服務方向、適合的引薦情境，以及由該會員邀請來參觀的專屬連結。</p>
     <div class="member-preview-grid">
-      <a class="member-preview" href="member-xiefengan.html">
+      <a class="member-preview" href="member-xiefengan.html" data-track="member_card_click" data-member="xiefengan">
         <img src="assets/photos/chair-xiefengan.jpg" alt="謝豐安">
         <div><span>金屬線材加工業</span><h3>謝豐安</h3><p>彈簧與金屬線材需求，從規格討論到供應協作。</p></div>
       </a>
-      <a class="member-preview" href="member-huangzhaoying.html">
+      <a class="member-preview" href="member-huangzhaoying.html" data-track="member_card_click" data-member="huangzhaoying">
         <img src="assets/photos/leader-huangzhaoying.jpg" alt="黃昭穎">
         <div><span>防火門業</span><h3>黃昭穎</h3><p>建案或空間需要防火門、入戶門規劃與服務。</p></div>
       </a>
-      <a class="member-preview" href="member-chenlingwei.html">
+      <a class="member-preview" href="member-chenlingwei.html" data-track="member_card_click" data-member="chenlingwei">
         <img src="assets/photos/focus-20261016.jpg" alt="陳令緯">
         <div><span>家電清洗業</span><h3>陳令緯</h3><p>住家、民宿與企業的家電清潔需求。</p></div>
       </a>
-      <a class="member-preview" href="member-chenyixin.html">
+      <a class="member-preview" href="member-chenyixin.html" data-track="member_card_click" data-member="chenyixin">
         <img src="assets/photos/leader-chenyixin.jpg" alt="陳以昕">
         <div><span>寢具業</span><h3>陳以昕</h3><p>想改善睡眠環境、挑選合適床墊與寢具。</p></div>
       </a>
-      <a class="member-preview" href="member-huangxiaohan.html">
+      <a class="member-preview" href="member-huangxiaohan.html" data-track="member_card_click" data-member="huangxiaohan">
         <img src="assets/photos/leader-huangxiaohan.jpg" alt="黃筱涵">
         <div><span>清潔服務業</span><h3>黃筱涵</h3><p>居家與空間清潔，希望有人協助整理維護。</p></div>
       </a>
@@ -383,6 +384,11 @@
         </tbody>
       </table>
     </div>
+    <div id="noResults" class="no-results" hidden>
+      <strong>目前名錄沒有找到完全符合的結果</strong>
+      你可以換一個需求說法，或把問題交給接待窗口協助媒合。
+      <br><a href="join.html?source=directory_no_result" class="btn btn-red" data-track="directory_no_result_click">請金貴協助找資源</a>
+    </div>
 
     <p style="margin-top:20px;color:var(--gray-70);font-size:.88rem">
       ※ 完整名錄沿用 2026-07-30 通訊錄資料；領導團隊資訊已更新為第十三屆。
@@ -416,6 +422,28 @@ const cats = [...new Set(rows.map(r => r.dataset.cat))].sort();
 const catSelect = document.getElementById('cat');
 const directoryParams = new URLSearchParams(location.search);
 let activeGroup = directoryParams.get('group');
+const searchAliases = {
+  '抓漏': ['防水工程業'],
+  '漏水': ['防水工程業'],
+  '裝潢': ['新成屋裝修業','老屋翻修業','廠辦規劃業'],
+  '室內設計': ['新成屋裝修業','老屋翻修業','廠辦規劃業'],
+  '門窗': ['防火門業','隔音氣密窗業','電動伸縮門業'],
+  '公司冷氣': ['冷氣空調業','家電清洗業'],
+  '洗冷氣': ['家電清洗業','冷氣空調業'],
+  '商標申請': ['商標專利業'],
+  '專利申請': ['商標專利業'],
+  '報稅': ['記帳士業'],
+  '記帳': ['記帳士業'],
+  '保險': ['人壽保險業','產物保險業'],
+  '睡不好': ['寢具業'],
+  '床墊': ['寢具業'],
+  '打掃': ['清潔服務業'],
+  '清洗': ['清潔服務業','家電清洗業'],
+  '影片': ['影片製作業'],
+  '社群': ['社群行銷業'],
+  '品牌': ['品牌設計業','社群行銷業'],
+  '律師': ['律師業']
+};
 cats.forEach(c => {
   const opt = document.createElement('option');
   opt.value = c; opt.textContent = c;
@@ -425,6 +453,9 @@ cats.forEach(c => {
 function applyFilter(){
   const q = document.getElementById('q').value.trim().toLowerCase();
   const cat = catSelect.value;
+  const aliasCats = [...new Set(Object.entries(searchAliases)
+    .filter(([alias]) => q && (q.includes(alias) || alias.includes(q)))
+    .flatMap(([, categories]) => categories))];
   const groups = {
     engineering: ['大理石材業','窗簾業','隔音氣密窗業','弱電通訊工程業','防水工程業','搬家業','冷氣空調業','防火門業','玻璃工程業','新成屋裝修業','老屋翻修業','廠辦規劃業','營造鐵件工程業','電動伸縮門業','鐵件工程業'],
     business: ['金屬線材加工業','房地仲介業','匯豐新車銷售業','影片製作業','記帳士業','證券金融業','人壽保險業','商標專利業','產物保險業','品牌設計業','社群行銷業','二手車業','律師業'],
@@ -433,7 +464,7 @@ function applyFilter(){
   let visible = 0;
   rows.forEach(r => {
     const text = r.textContent.toLowerCase();
-    const matchQ = !q || text.includes(q);
+    const matchQ = !q || text.includes(q) || aliasCats.includes(r.dataset.cat);
     const matchCat = !cat || r.dataset.cat === cat;
     const matchGroup = !groups[activeGroup] || groups[activeGroup].includes(r.dataset.cat);
     const show = matchQ && matchCat && matchGroup;
@@ -441,6 +472,15 @@ function applyFilter(){
     if (show) visible += 1;
   });
   document.getElementById('resultCount').textContent = `找到 ${visible} 位會員`;
+  document.getElementById('noResults').hidden = visible !== 0;
+  if (q && typeof window.ginguiTrack === 'function') {
+    window.clearTimeout(window.directorySearchTimer);
+    window.directorySearchTimer = window.setTimeout(() => window.ginguiTrack('directory_search', {
+      query_length: q.length,
+      result_count: visible,
+      alias_match: aliasCats.length > 0
+    }), 700);
+  }
 }
 document.getElementById('q').addEventListener('input', applyFilter);
 catSelect.addEventListener('change', () => { activeGroup = null; applyFilter(); });

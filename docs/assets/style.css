@@ -23,6 +23,7 @@
 }
 
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html{scroll-behavior:smooth}
 body{
   margin:0;
@@ -336,6 +337,10 @@ footer .gold-line{
 .guest-form input:focus, .guest-form textarea:focus, .guest-form select:focus{outline:2px solid var(--gingui-gold);outline-offset:1px}
 .field-help{display:block;color:var(--gray-70);margin-top:6px;font-size:.8rem}
 .guest-form .honey{position:absolute;left:-9999px;opacity:0}
+.form-success{max-width:760px;background:#fff;border:1px solid #e4d4bc;border-left:5px solid var(--gingui-gold);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px 30px;margin-top:24px}
+.form-success h3{font-size:1.35rem;margin:0 0 10px}.form-success p{color:var(--gray-90);margin:8px 0}.form-success .success-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}.form-success .btn-outline-dark{border-color:var(--gray-90)}
+.no-results{background:#fff7ec;border:1px solid #ead7bb;border-radius:var(--radius);padding:24px;margin-top:20px;color:var(--gray-90)}
+.no-results strong{display:block;color:var(--ink);font-size:1.05rem;margin-bottom:6px}.no-results .btn{margin-top:14px}
 
 /* ---------- Featured story (with image) ---------- */
 .story-featured{

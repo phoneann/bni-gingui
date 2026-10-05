@@ -16,7 +16,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/style.css?v=20261005b">
+<script src="assets/tracking.js?v=20261005b"></script>
 </head>
 <body>
 
@@ -123,7 +124,7 @@
 
     <form class="guest-form" id="guestForm" action="https://api.web3forms.com/submit" method="POST">
       <input type="hidden" name="access_key" value="b36d5605-6fb1-4fd6-adac-4fc687771447">
-      <input type="hidden" name="subject" value="【金貴分會官網】來賓報名">
+      <input type="hidden" id="g-subject" name="subject" value="【金貴分會官網】來賓報名">
       <input type="hidden" id="g-source" name="來源頁面" value="金貴官網">
       <input type="hidden" name="redirect" value="https://ginguitn.com/join.html?sent=1">
       <input type="checkbox" name="botcheck" class="honey" style="display:none" tabindex="-1" autocomplete="off">
@@ -149,8 +150,13 @@
         <input type="text" id="g-resource" name="希望認識的資源" placeholder="例如：建築師、企業總務、品牌行銷">
       </div>
       <div class="field">
-        <label for="g-date">預計蒞臨日期</label>
-        <input type="date" id="g-date" name="預計蒞臨日期">
+        <label for="g-date">預計蒞臨場次 *</label>
+        <select id="g-date" name="預計蒞臨場次" required>
+          <option value="">請選擇已確認場次</option>
+          <option value="2026-10-16（五）06:30｜陳令緯主講">2026-10-16（五）06:30｜陳令緯主講</option>
+          <option value="其他週五，由接待窗口協助確認">其他週五｜請接待窗口協助安排</option>
+        </select>
+        <small class="field-help">例會為每週五 06:30–08:30；網站只列目前已確認可報名的場次。</small>
       </div>
       <div class="field">
         <label for="g-note">備註（想了解什麼、飲食習慣等）</label>
@@ -158,9 +164,19 @@
       </div>
       <button type="submit" class="btn btn-red" style="border:none;cursor:pointer;width:100%">送出報名</button>
     </form>
-    <p id="sentMsg" hidden style="margin-top:16px;color:var(--bni-red);font-weight:700">
-      已收到你的資料，接待窗口會盡快跟你聯絡！
-    </p>
+    <div id="successPanel" class="form-success" hidden tabindex="-1">
+      <div class="kicker">REGISTRATION RECEIVED</div>
+      <h3>資料已送達接待窗口</h3>
+      <p id="successSummary">接待夥伴會與你聯絡確認場次與座位；送出表單不代表座位已完成確認。</p>
+      <p><strong>固定例會：</strong>週五 06:30–08:30，建議 06:20 前抵達。</p>
+      <p><strong>地點：</strong>BNI 台南菁英會所｜台南市北區文成路781-2號。</p>
+      <p>若行前仍未收到確認，可致電接待窗口謝豐安 0955-468352。</p>
+      <div class="success-actions">
+        <a id="calendarButton" class="btn btn-gold" href="#" target="_blank" rel="noopener" hidden data-track="add_calendar_click">加入 Google 行事曆</a>
+        <a class="btn btn-outline-dark" href="tel:0955468352" data-track="reception_contact_click">聯絡接待窗口</a>
+        <a class="btn btn-outline-dark" href="index.html">回首頁</a>
+      </div>
+    </div>
 
     <p style="margin-top:24px;color:var(--gray-70);font-size:.9rem">
       ※ 表單送出後會直接寄到接待窗口信箱。
@@ -169,14 +185,51 @@
 </section>
 <script>
 const params = new URLSearchParams(location.search);
+const inviterIds = {'謝豐安':'xiefengan','黃昭穎':'huangzhaoying','陳令緯':'chenlingwei','陳以昕':'chenyixin','黃筱涵':'huangxiaohan'};
+const inviterId = (name) => inviterIds[name] || (name ? 'other_member' : 'self_signup');
 if (params.get('sent') === '1') {
-  document.getElementById('sentMsg').hidden = false;
+  let saved = {};
+  try { saved = JSON.parse(sessionStorage.getItem('ginguiGuestSubmission') || '{}'); } catch { saved = {}; }
+  document.getElementById('guestForm').hidden = true;
+  const panel = document.getElementById('successPanel');
+  panel.hidden = false;
+  if (saved.date) {
+    document.getElementById('successSummary').textContent = `已收到 ${saved.date} 的報名資料。接待夥伴會再與你確認場次與座位；送出表單不代表座位已完成確認。`;
+  }
+  if (saved.date && saved.date.startsWith('2026-10-16')) {
+    const calendar = document.getElementById('calendarButton');
+    calendar.href = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=BNI%20%E9%87%91%E8%B2%B4%E5%88%86%E6%9C%83%E4%BE%8B%E6%9C%83%EF%BD%9C%E9%99%B3%E4%BB%A4%E7%B7%AF%E4%B8%BB%E8%AC%9B&dates=20261016T063000/20261016T083000&ctz=Asia%2FTaipei&location=%E5%8F%B0%E5%8D%97%E5%B8%82%E5%8C%97%E5%8D%80%E6%96%87%E6%88%90%E8%B7%AF781-2%E8%99%9F&details=%E8%AB%8B%E6%8F%90%E6%97%A910%E5%88%86%E6%8A%B5%E9%81%94%EF%BC%8C%E5%BA%A7%E4%BD%8D%E4%BB%A5%E6%8E%A5%E5%BE%85%E7%AA%97%E5%8F%A3%E7%A2%BA%E8%AA%8D%E7%82%BA%E6%BA%96%E3%80%82';
+    calendar.hidden = false;
+  }
+  window.ginguiTrack?.('guest_form_success', {inviter_id: inviterId(saved.invitedBy), meeting_choice: saved.date || ''});
+  panel.focus();
 }
 const invitedBy = params.get('invited_by');
 if (invitedBy) {
   document.getElementById('g-invited').value = invitedBy;
   document.getElementById('g-source').value = `會員數位名片：${invitedBy}`;
+  window.ginguiTrack?.('member_referral_visit', {inviter_id: inviterId(invitedBy)});
 }
+if (params.get('source') === 'directory_no_result') {
+  document.getElementById('g-source').value = '會員名錄：搜尋無結果';
+}
+if (params.get('meeting') === '2026-10-16') {
+  document.getElementById('g-date').value = '2026-10-16（五）06:30｜陳令緯主講';
+}
+const guestForm = document.getElementById('guestForm');
+let formStarted = false;
+guestForm.addEventListener('focusin', () => {
+  if (formStarted) return;
+  formStarted = true;
+  window.ginguiTrack?.('guest_form_start', {inviter_id: inviterId(document.getElementById('g-invited').value.trim())});
+});
+guestForm.addEventListener('submit', () => {
+  const date = document.getElementById('g-date').value;
+  const invited = document.getElementById('g-invited').value.trim();
+  document.getElementById('g-subject').value = `【金貴來賓報名】${date}｜${invited || '自行報名'}`;
+  sessionStorage.setItem('ginguiGuestSubmission', JSON.stringify({date, invitedBy: invited}));
+  window.ginguiTrack?.('guest_form_submit', {inviter_id: inviterId(invited), meeting_choice: date});
+});
 </script>
 
 <footer>
