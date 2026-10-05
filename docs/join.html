@@ -124,6 +124,7 @@
     <form class="guest-form" id="guestForm" action="https://api.web3forms.com/submit" method="POST">
       <input type="hidden" name="access_key" value="b36d5605-6fb1-4fd6-adac-4fc687771447">
       <input type="hidden" name="subject" value="【金貴分會官網】來賓報名">
+      <input type="hidden" id="g-source" name="來源頁面" value="金貴官網">
       <input type="hidden" name="redirect" value="https://ginguitn.com/join.html?sent=1">
       <input type="checkbox" name="botcheck" class="honey" style="display:none" tabindex="-1" autocomplete="off">
       <div class="field">
@@ -137,6 +138,22 @@
       <div class="field">
         <label for="g-contact">聯絡方式（手機或LINE ID） *</label>
         <input type="text" id="g-contact" name="聯絡方式" required>
+      </div>
+      <div class="field">
+        <label for="g-invited">邀請你的金貴會員</label>
+        <select id="g-invited" name="邀請會員">
+          <option value="自行報名">自行報名／不確定</option>
+          <option>謝豐安</option>
+          <option>黃昭穎</option>
+          <option>陳令緯</option>
+          <option>陳以昕</option>
+          <option>黃筱涵</option>
+        </select>
+        <small class="field-help">若你從會員的數位名片進入，系統會自動帶入邀請人。</small>
+      </div>
+      <div class="field">
+        <label for="g-resource">你最想認識哪一類資源？</label>
+        <input type="text" id="g-resource" name="希望認識的資源" placeholder="例如：建築師、企業總務、品牌行銷">
       </div>
       <div class="field">
         <label for="g-date">預計蒞臨日期</label>
@@ -158,8 +175,18 @@
   </div>
 </section>
 <script>
-if (new URLSearchParams(location.search).get('sent') === '1') {
+const params = new URLSearchParams(location.search);
+if (params.get('sent') === '1') {
   document.getElementById('sentMsg').hidden = false;
+}
+const invitedBy = params.get('invited_by');
+if (invitedBy) {
+  const select = document.getElementById('g-invited');
+  const option = Array.from(select.options).find(item => item.value === invitedBy);
+  if (option) {
+    select.value = invitedBy;
+    document.getElementById('g-source').value = `會員數位名片：${invitedBy}`;
+  }
 }
 </script>
 

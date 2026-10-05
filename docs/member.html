@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-X0NWSKJ8MS"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-X0NWSKJ8MS');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>會員數位名片｜BNI 金貴分會</title>
+<meta name="description" content="認識 BNI 台南金貴分會會員的服務、適合引薦的需求與聯絡方式。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<nav class="nav">
+  <div class="wrap">
+    <a href="index.html" class="brand">
+      <img src="assets/logo/bni-proud-member-red.png" alt="BNI Proud Member" class="bni-logo">
+      <span class="divider"></span>
+      <img src="assets/logo/gingui-logo-nav.png" alt="GINGUI 金貴分會" class="gingui-logo">
+    </a>
+    <ul>
+      <li><a href="index.html">首頁</a></li>
+      <li><a href="about.html">關於金貴</a></li>
+      <li><a href="faq.html">常見問題</a></li>
+      <li><a href="join.html">來賓報名</a></li>
+      <li><a href="directory.html" class="active">會員名錄</a></li>
+    </ul>
+    <a href="join.html" class="cta">預約蒞臨</a>
+  </div>
+</nav>
+
+<main id="memberPage" hidden>
+  <section class="member-hero">
+    <div class="wrap member-hero-grid">
+      <img id="memberPhoto" class="member-photo" src="" alt="">
+      <div>
+        <span id="memberIndustry" class="tag"></span>
+        <h1 id="memberName"></h1>
+        <p id="memberPromise" class="member-promise"></p>
+        <p id="memberCompany" class="member-company"></p>
+        <div class="btns">
+          <a id="contactButton" class="btn btn-gold" href="">直接聯絡</a>
+          <a id="inviteButton" class="btn btn-outline" href="">由這位會員邀請參觀</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap profile-grid">
+      <article class="profile-panel">
+        <div class="kicker">WHEN TO REFER</div>
+        <h2>聽到這些需求，可以介紹給我</h2>
+        <ul id="referralList" class="check-list"></ul>
+      </article>
+      <article class="profile-panel">
+        <div class="kicker">WHAT I DO</div>
+        <h2>我能提供的協助</h2>
+        <ul id="serviceList" class="check-list"></ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="wrap">
+      <div class="kicker">TRUST EVIDENCE</div>
+      <h2>你可以先知道的<span class="accent">信任證據</span></h2>
+      <div id="evidence" class="evidence-box"></div>
+      <p class="profile-note">本頁內容依金貴分會現有公開資料整理；實際服務範圍、規格與報價，請直接向會員確認。</p>
+    </div>
+  </section>
+
+  <section class="section profile-cta">
+    <div class="wrap">
+      <div>
+        <div class="kicker">VISIT GINGUI</div>
+        <h2>想認識這位會員，也想看看金貴怎麼合作？</h2>
+        <p>用專屬連結報名，表單會自動帶入邀請人，接待窗口能更快完成後續安排。</p>
+      </div>
+      <a id="bottomInvite" class="btn btn-red" href="">預約參觀金貴</a>
+    </div>
+  </section>
+</main>
+
+<section id="notFound" class="section" hidden>
+  <div class="wrap">
+    <h1>找不到這位會員</h1>
+    <p>這張數位名片可能還在整理中，請回完整會員名錄查詢。</p>
+    <a class="btn btn-red" href="directory.html">回會員名錄</a>
+  </div>
+</section>
+
+<footer>
+  <hr class="gold-line">
+  <div class="wrap">
+    <div>© <span id="year"></span> BNI 台南金貴分會．一個專業，一位代表<br><small style="opacity:.6">BNI® 及相關商標為 BNI Global, LLC 所有，本站為分會自建之非官方資訊頁面。</small></div>
+    <div><a href="index.html">首頁</a> ・ <a href="directory.html">會員名錄</a> ・ <a href="join.html">來賓報名</a></div>
+  </div>
+</footer>
+
+<script>
+const members = {
+  xiefengan: {
+    name: '謝豐安', industry: '金屬線材加工業', company: 'SpringGate 好年',
+    photo: 'assets/photos/chair-xiefengan.jpg', phone: '0955468352',
+    promise: '彈簧與金屬線材需求，從規格討論到供應協作。',
+    services: ['彈簧與金屬線材加工需求討論', '依產品條件協助釐清規格與供應方向', '連結適合的製造與商務合作資源'],
+    referrals: ['企業正在找彈簧、線材成形或相關零件供應', '新產品需要討論材料、規格或製造可行性', '傳產業者想尋找跨產業合作與商務連結'],
+    evidence: '<strong>金貴創會及第 2 屆主席、雙金質獎章會員。</strong>金貴公開成功故事記錄：謝豐安透過既有人脈協助黃昭穎連結建商資源，促成 700 萬元防火門訂單。',
+    website: 'https://springgate.com.tw'
+  },
+  huangzhaoying: {
+    name: '黃昭穎', industry: '防火門業', company: '勝紘國際建材',
+    photo: 'assets/photos/leader-huangzhaoying.jpg', phone: '0980213167',
+    promise: '建案或空間需要防火門、入戶門規劃與服務。',
+    services: ['防火門與入戶門需求諮詢', '建案相關門類產品與服務討論', '依現場與專案條件確認合適方案'],
+    referrals: ['建商、營造或設計端正在規劃防火門', '住宅或商用空間需要入戶門服務', '專案需要能持續溝通與配合的建材夥伴'],
+    evidence: '<strong>金貴第 13 屆副主席。</strong>金貴公開成功故事記錄：透過分會夥伴謝豐安連結建商資源，促成 700 萬元防火門訂單。',
+    website: 'https://www.oakforest.com.tw/'
+  },
+  chenlingwei: {
+    name: '陳令緯', industry: '家電清洗業', company: '吾家有洗／宅淨優化',
+    photo: 'assets/photos/focus-20261016.jpg', phone: '0986709467',
+    promise: '讓乾淨成為習慣，家有洗事就交給吾家有洗。',
+    services: ['住家家電清洗需求', '民宿、旅館與機構的清潔合作討論', '多台冷氣等企業型清洗需求評估'],
+    referrals: ['民宿或旅館業主準備安排清潔', '托嬰、產後護理或長照單位重視環境維護', '企業總務或採購有多台冷氣清洗需求'],
+    evidence: '<strong>金貴近期主題簡報講者。</strong>公開簡報主題為「乾淨『洗』以為常，黴菌無處可藏」，並列出民宿、企業總務、托嬰與長照等希望認識的合作對象。',
+    website: 'https://www.wash-mh.com/'
+  },
+  chenyixin: {
+    name: '陳以昕', industry: '寢具業', company: '好眠時代企業社',
+    photo: 'assets/photos/leader-chenyixin.jpg', phone: '0930001885',
+    promise: '協助你挑選適合的床墊與寢具，讓睡眠環境更安心。',
+    services: ['床墊與寢具選擇諮詢', '依個人睡眠需求討論合適方向', '居家睡眠環境相關產品服務'],
+    referrals: ['搬新家、換房或準備更新床墊', '睡眠環境需要重新評估與調整', '企業或合作夥伴有寢具相關需求'],
+    evidence: '<strong>金貴第 13 屆主席、金質獎章會員。</strong>也是金貴公開領導團隊與歷屆主席資料中的現任主席。',
+    website: ''
+  },
+  huangxiaohan: {
+    name: '黃筱涵', industry: '清潔服務業', company: '永揚清潔有限公司',
+    photo: 'assets/photos/leader-huangxiaohan.jpg', phone: '0982083619',
+    promise: '居家清潔大小事，協助空間維持舒適與整潔。',
+    services: ['居家與空間清潔需求', '依現場狀況討論清潔服務', '長期或階段性的環境維護合作'],
+    referrals: ['居家空間需要專業清潔協助', '搬遷、整理或工程後需要清潔', '企業與合作單位需要環境維護資源'],
+    evidence: '<strong>金貴第 13 屆秘書財務、第 9 屆主席、金質獎章會員。</strong>長期參與分會運作，相關經歷已公開於金貴介紹頁。',
+    website: 'https://hemusih.com/coatslip-cleaning/'
+  }
+};
+
+const params = new URLSearchParams(location.search);
+const member = members[params.get('id')];
+document.getElementById('year').textContent = new Date().getFullYear();
+
+if (!member) {
+  document.getElementById('notFound').hidden = false;
+} else {
+  document.getElementById('memberPage').hidden = false;
+  document.title = `${member.name}｜${member.industry}｜BNI 金貴分會`;
+  document.querySelector('meta[name="description"]').content = `${member.name}是 BNI 金貴分會的${member.industry}會員。查看服務方向、適合引薦的需求與聯絡方式。`;
+  document.getElementById('memberPhoto').src = member.photo;
+  document.getElementById('memberPhoto').alt = member.name;
+  document.getElementById('memberIndustry').textContent = member.industry;
+  document.getElementById('memberName').textContent = member.name;
+  document.getElementById('memberPromise').textContent = member.promise;
+  document.getElementById('memberCompany').innerHTML = member.website ? `<a href="${member.website}" target="_blank" rel="noopener">${member.company} ↗</a>` : member.company;
+  document.getElementById('contactButton').href = `tel:${member.phone}`;
+  document.getElementById('contactButton').textContent = `電話聯絡 ${member.phone.replace(/(\d{4})(\d{3})(\d{3})/, '$1-$2-$3')}`;
+  const inviteUrl = `join.html?invited_by=${encodeURIComponent(member.name)}`;
+  document.getElementById('inviteButton').href = inviteUrl;
+  document.getElementById('bottomInvite').href = inviteUrl;
+  document.getElementById('evidence').innerHTML = member.evidence;
+  member.services.forEach(text => document.getElementById('serviceList').insertAdjacentHTML('beforeend', `<li>${text}</li>`));
+  member.referrals.forEach(text => document.getElementById('referralList').insertAdjacentHTML('beforeend', `<li>${text}</li>`));
+}
+</script>
+</body>
+</html>

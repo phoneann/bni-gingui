@@ -52,6 +52,39 @@
 
 <section class="section">
   <div class="wrap">
+    <div class="kicker">MEMBER SPOTLIGHT</div>
+    <h2>先從「能幫你什麼」認識會員</h2>
+    <p class="desc">以下 5 位先完成數位名片示範。每張名片都整理了服務方向、適合的引薦情境，以及由該會員邀請來參觀的專屬連結。</p>
+    <div class="member-preview-grid">
+      <a class="member-preview" href="member.html?id=xiefengan">
+        <img src="assets/photos/chair-xiefengan.jpg" alt="謝豐安">
+        <div><span>金屬線材加工業</span><h3>謝豐安</h3><p>彈簧與金屬線材需求，從規格討論到供應協作。</p></div>
+      </a>
+      <a class="member-preview" href="member.html?id=huangzhaoying">
+        <img src="assets/photos/leader-huangzhaoying.jpg" alt="黃昭穎">
+        <div><span>防火門業</span><h3>黃昭穎</h3><p>建案或空間需要防火門、入戶門規劃與服務。</p></div>
+      </a>
+      <a class="member-preview" href="member.html?id=chenlingwei">
+        <img src="assets/photos/focus-20261016.jpg" alt="陳令緯">
+        <div><span>家電清洗業</span><h3>陳令緯</h3><p>住家、民宿與企業的家電清潔需求。</p></div>
+      </a>
+      <a class="member-preview" href="member.html?id=chenyixin">
+        <img src="assets/photos/leader-chenyixin.jpg" alt="陳以昕">
+        <div><span>寢具業</span><h3>陳以昕</h3><p>想改善睡眠環境、挑選合適床墊與寢具。</p></div>
+      </a>
+      <a class="member-preview" href="member.html?id=huangxiaohan">
+        <img src="assets/photos/leader-huangxiaohan.jpg" alt="黃筱涵">
+        <div><span>清潔服務業</span><h3>黃筱涵</h3><p>居家與空間清潔，希望有人協助整理維護。</p></div>
+      </a>
+    </div>
+
+    <div class="directory-heading">
+      <div>
+        <div class="kicker">FULL DIRECTORY</div>
+        <h2>完整會員名錄</h2>
+      </div>
+      <p id="resultCount" aria-live="polite"></p>
+    </div>
     <div class="dir-toolbar">
       <input type="text" id="q" placeholder="搜尋姓名或行業…">
       <select id="cat">
@@ -72,10 +105,10 @@
         <tbody>
           <!-- 真實會員名單來源：金貴分會Slogan表-家榆.xlsx，第12屆 2026-07-30更新，共46筆 -->
           <tr data-cat="金屬線材加工業" title="金屬線材魔法師，彈簧製造 萬無一失">
-            <td class="name">謝豐安</td>
+            <td class="name"><a class="member-link" href="member.html?id=xiefengan">謝豐安</a></td>
             <td><span class="badge-cat">金屬線材加工業</span></td>
             <td class="phone">0955-468352</td>
-            <td><a href="https://goodyears.com.tw" target="_blank" rel="noopener">好年企業有限公司</a></td>
+            <td><a href="https://springgate.com.tw" target="_blank" rel="noopener">SpringGate 好年</a></td>
           </tr>
           <tr data-cat="調理保健業" title="人體健康的顏色，整體健康 體研社">
             <td class="name">蘇俊丞</td>
@@ -102,7 +135,7 @@
             <td>畇朵家飾布企業社</td>
           </tr>
           <tr data-cat="清潔服務業" title="居家清潔大小事，永揚讓家 更舒適">
-            <td class="name">黃筱涵</td>
+            <td class="name"><a class="member-link" href="member.html?id=huangxiaohan">黃筱涵</a></td>
             <td><span class="badge-cat">清潔服務業</span></td>
             <td class="phone">0982-083619</td>
             <td><a href="https://hemusih.com/coatslip-cleaning/" target="_blank" rel="noopener">永揚清潔有限公司</a></td>
@@ -174,13 +207,13 @@
             <td><a href="https://www.nanshanlife.com.tw" target="_blank" rel="noopener">南山人壽</a></td>
           </tr>
           <tr data-cat="寢具業" title="買床墊找以昕，讓你睡的健康 又安心">
-            <td class="name">陳以昕</td>
+            <td class="name"><a class="member-link" href="member.html?id=chenyixin">陳以昕</a></td>
             <td><span class="badge-cat">寢具業</span></td>
             <td class="phone">0930-001885</td>
             <td>好眠時代企業社</td>
           </tr>
           <tr data-cat="家電清洗業" title="讓乾淨成為習慣，家有洗事就交給 吾家有洗">
-            <td class="name">陳令緯</td>
+            <td class="name"><a class="member-link" href="member.html?id=chenlingwei">陳令緯</a></td>
             <td><span class="badge-cat">家電清洗業</span></td>
             <td class="phone">0986-709467</td>
             <td><a href="https://www.wash-mh.com/" target="_blank" rel="noopener">吾家有洗-宅淨優化</a></td>
@@ -240,7 +273,7 @@
             <td>上毅空調工程有限公司</td>
           </tr>
           <tr data-cat="防火門業" title="入戶門找勝紘，讓你家大門 與眾不同">
-            <td class="name">黃昭穎</td>
+            <td class="name"><a class="member-link" href="member.html?id=huangzhaoying">黃昭穎</a></td>
             <td><span class="badge-cat">防火門業</span></td>
             <td class="phone">0980-213167</td>
             <td><a href="http://www.oakforest.com.tw/" target="_blank" rel="noopener">勝紘國際建材</a></td>
@@ -352,8 +385,8 @@
     </div>
 
     <p style="margin-top:20px;color:var(--gray-70);font-size:.88rem">
-      ※ 以上共 46 筆為第十二屆（2026-07-30 更新）會員資料，來源為分會內部通訊錄。
-      正式對外上線前，仍需經每位會員本人確認同意公開聯絡電話後才可正式發布。
+      ※ 完整名錄沿用 2026-07-30 通訊錄資料；領導團隊資訊已更新為第十三屆。
+      聯絡資料如需更正或調整公開範圍，請洽分會網站管理窗口。
     </p>
   </div>
 </section>
@@ -390,15 +423,22 @@ cats.forEach(c => {
 function applyFilter(){
   const q = document.getElementById('q').value.trim().toLowerCase();
   const cat = catSelect.value;
+  let visible = 0;
   rows.forEach(r => {
     const text = r.textContent.toLowerCase();
     const matchQ = !q || text.includes(q);
     const matchCat = !cat || r.dataset.cat === cat;
-    r.style.display = (matchQ && matchCat) ? '' : 'none';
+    const show = matchQ && matchCat;
+    r.style.display = show ? '' : 'none';
+    if (show) visible += 1;
   });
+  document.getElementById('resultCount').textContent = `找到 ${visible} 位會員`;
 }
 document.getElementById('q').addEventListener('input', applyFilter);
 catSelect.addEventListener('change', applyFilter);
+const initialQuery = new URLSearchParams(location.search).get('q');
+if (initialQuery) document.getElementById('q').value = initialQuery;
+applyFilter();
 </script>
 </body>
 </html>
