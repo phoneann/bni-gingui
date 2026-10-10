@@ -103,7 +103,7 @@
           </tr>
         </thead>
         <tbody>
-          <!-- 真實會員名單來源：金貴分會Slogan表-家榆.xlsx，第12屆 2026-07-30更新，共46筆 -->
+          <!-- 真實會員名單來源：金貴分會Slogan表-家榆.xlsx，第13屆 1016更新，共48筆；來源檔 https://docs.google.com/spreadsheets/d/1kaTEKZM0pJ10gh4eSPwlKOvFNJ5yY1EK -->
           <tr data-cat="金屬線材加工業" title="金屬線材魔法師，彈簧製造 萬無一失">
             <td class="name"><a class="member-link" href="member-xiefengan.html">謝豐安</a></td>
             <td><span class="badge-cat">金屬線材加工業</span></td>
@@ -218,12 +218,6 @@
             <td class="phone">0986-709467</td>
             <td><a href="https://www.wash-mh.com/" target="_blank" rel="noopener">吾家有洗-宅淨優化</a></td>
           </tr>
-          <tr data-cat="商標專利業" title="騎車要戴安全帽，註冊商標 抗仿冒">
-            <td class="name">鄧 雲</td>
-            <td><span class="badge-cat">商標專利業</span></td>
-            <td class="phone">0985-533789</td>
-            <td><a href="https://www.wupatent.com/" target="_blank" rel="noopener">吳宗融專利師事務所</a></td>
-          </tr>
           <tr data-cat="產物保險業" title="產險火險責任險，保障財產 降低風險">
             <td class="name">古其晧</td>
             <td><span class="badge-cat">產物保險業</span></td>
@@ -332,7 +326,7 @@
             <td class="phone">0919-573369</td>
             <td>永振承土木包工業</td>
           </tr>
-          <tr data-cat="廠辦規劃業" title="規劃設計有效率，辦公家俱 超easy">
+          <tr data-cat="廠辦規劃業" title="規劃設計有效率，廠辦規劃 超easy">
             <td class="name">黃鈺宸</td>
             <td><span class="badge-cat">廠辦規劃業</span></td>
             <td class="phone">0988-323608</td>
@@ -380,6 +374,24 @@
             <td class="phone">0970-881369</td>
             <td>嬌慕企業社</td>
           </tr>
+          <tr data-cat="美容護膚業" title="肌膚逆齡找小安，要回 babyface">
+            <td class="name">林容安</td>
+            <td><span class="badge-cat">美容護膚業</span></td>
+            <td class="phone">0979-281588</td>
+            <td>亮采美容室</td>
+          </tr>
+          <tr data-cat="AI動漫製作業">
+            <td class="name">湯寧海</td>
+            <td><span class="badge-cat">AI動漫製作業</span></td>
+            <td class="phone">0913-579005</td>
+            <td>小海龜出版社</td>
+          </tr>
+          <tr data-cat="廚具業" title="廚房不將就，生活 更講究">
+            <td class="name">李祐澄</td>
+            <td><span class="badge-cat">廚具業</span></td>
+            <td class="phone">0935-881002</td>
+            <td>櫻花整體廚房新營店</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -390,7 +402,7 @@
     </div>
 
     <p style="margin-top:20px;color:var(--gray-70);font-size:.88rem">
-      ※ 完整名錄沿用 2026-07-30 通訊錄資料；領導團隊資訊已更新為第十三屆。
+      ※ 完整名錄依第十三屆通訊錄（1016 更新版）整理，共 48 位會員。
       聯絡資料如需更正或調整公開範圍，請洽分會網站管理窗口。
     </p>
   </div>
@@ -429,8 +441,6 @@ const searchAliases = {
   '門窗': ['防火門業','隔音氣密窗業','電動伸縮門業'],
   '公司冷氣': ['冷氣空調業','家電清洗業'],
   '洗冷氣': ['家電清洗業','冷氣空調業'],
-  '商標申請': ['商標專利業'],
-  '專利申請': ['商標專利業'],
   '報稅': ['記帳士業'],
   '記帳': ['記帳士業'],
   '保險': ['人壽保險業','產物保險業'],
@@ -456,9 +466,9 @@ function applyFilter(){
     .filter(([alias]) => q && (q.includes(alias) || alias.includes(q)))
     .flatMap(([, categories]) => categories))];
   const groups = {
-    engineering: ['大理石材業','窗簾業','隔音氣密窗業','弱電通訊工程業','防水工程業','搬家業','冷氣空調業','防火門業','玻璃工程業','新成屋裝修業','老屋翻修業','廠辦規劃業','營造鐵件工程業','電動伸縮門業','鐵件工程業'],
-    business: ['金屬線材加工業','房地仲介業','匯豐新車銷售業','影片製作業','記帳士業','證券金融業','人壽保險業','商標專利業','產物保險業','品牌設計業','社群行銷業','二手車業','律師業'],
-    wellness: ['調理保健業','清潔服務業','義式甜點業','咖啡業','筋膜刀放鬆業','蔬果精力湯業','寵物飲料銷售業','寢具業','家電清洗業','形象造型規劃業','頭皮髮量建構業','熱蠟除毛業','膠原蛋白食品業','手搖飲業','空氣清淨機業','美體SPA業']
+    engineering: ['大理石材業','窗簾業','隔音氣密窗業','弱電通訊工程業','防水工程業','搬家業','冷氣空調業','防火門業','玻璃工程業','新成屋裝修業','老屋翻修業','廠辦規劃業','營造鐵件工程業','電動伸縮門業','鐵件工程業','廚具業'],
+    business: ['金屬線材加工業','房地仲介業','匯豐新車銷售業','影片製作業','記帳士業','證券金融業','人壽保險業','產物保險業','品牌設計業','社群行銷業','二手車業','律師業','AI動漫製作業'],
+    wellness: ['調理保健業','清潔服務業','義式甜點業','咖啡業','筋膜刀放鬆業','蔬果精力湯業','寵物飲料銷售業','寢具業','家電清洗業','形象造型規劃業','頭皮髮量建構業','熱蠟除毛業','膠原蛋白食品業','手搖飲業','空氣清淨機業','美體SPA業','美容護膚業']
   };
   let visible = 0;
   rows.forEach(r => {
