@@ -82,7 +82,7 @@
         <div>
           <h3>準備一句話自我介紹</h3>
           <p>
-            現場會有機會讓每位來賓做簡短的自我介紹（僅 10 秒）與心得分享（僅 10 秒），
+            依 10/23 主講公告，請準備 15 秒自我介紹，
             不用寫逐字稿，講清楚「你是誰、做什麼」就足夠。
           </p>
         </div>
@@ -92,7 +92,7 @@
         <div>
           <h3>帶著名片，輕鬆出席</h3>
           <p>
-            建議攜帶足夠的名片方便交流；服裝以商務便服為主，不需要特別正式。
+            依 10/23 主講公告，請準備 70 張名片方便交流，並穿著商務正式服裝。
             費用：每次 NT$400（含早餐）。
           </p>
         </div>
@@ -152,7 +152,7 @@
         <label for="g-date">預計蒞臨場次 *</label>
         <select id="g-date" name="預計蒞臨場次" required>
           <option value="">請選擇已確認場次</option>
-          <option value="2026-10-16（五）06:30｜陳令緯主講">2026-10-16（五）06:30｜陳令緯主講</option>
+          <option value="2026-10-23（五）06:30｜李朵嬅主講">2026-10-23（五）06:30｜李朵嬅主講</option>
           <option value="其他週五，由接待窗口協助確認">其他週五｜請接待窗口協助安排</option>
         </select>
         <small class="field-help">例會為每週五 06:30–08:30；網站只列目前已確認可報名的場次。</small>
@@ -195,13 +195,22 @@ if (params.get('sent') === '1') {
   if (saved.date) {
     document.getElementById('successSummary').textContent = `已收到 ${saved.date} 的報名資料。接待夥伴會再與你確認場次與座位；送出表單不代表座位已完成確認。`;
   }
-  if (saved.date && saved.date.startsWith('2026-10-16')) {
+  if (saved.date && saved.date.startsWith('2026-10-23')) {
     const calendar = document.getElementById('calendarButton');
-    calendar.href = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=BNI%20%E9%87%91%E8%B2%B4%E5%88%86%E6%9C%83%E4%BE%8B%E6%9C%83%EF%BD%9C%E9%99%B3%E4%BB%A4%E7%B7%AF%E4%B8%BB%E8%AC%9B&dates=20261016T063000/20261016T083000&ctz=Asia%2FTaipei&location=%E5%8F%B0%E5%8D%97%E5%B8%82%E5%8C%97%E5%8D%80%E6%96%87%E6%88%90%E8%B7%AF781-2%E8%99%9F&details=%E8%AB%8B%E6%8F%90%E6%97%A910%E5%88%86%E6%8A%B5%E9%81%94%EF%BC%8C%E5%BA%A7%E4%BD%8D%E4%BB%A5%E6%8E%A5%E5%BE%85%E7%AA%97%E5%8F%A3%E7%A2%BA%E8%AA%8D%E7%82%BA%E6%BA%96%E3%80%82';
+    calendar.href = 'https://calendar.google.com/calendar/render?action=TEMPLATE&text=BNI%20%E9%87%91%E8%B2%B4%E5%88%86%E6%9C%83%E4%BE%8B%E6%9C%83%EF%BD%9C%E6%9D%8E%E6%9C%B5%E5%AC%85%E4%B8%BB%E8%AC%9B&dates=20261023T063000/20261023T083000&ctz=Asia%2FTaipei&location=%E5%8F%B0%E5%8D%97%E5%B8%82%E5%8C%97%E5%8D%80%E6%96%87%E6%88%90%E8%B7%AF781-2%E8%99%9F&details=08%3A30%20%E7%82%BA%E5%9B%BA%E5%AE%9A%E4%BE%8B%E6%9C%83%E9%A0%90%E8%A8%88%E7%B5%90%E6%9D%9F%E6%99%82%E9%96%93%EF%BC%8C%E5%AF%A6%E9%9A%9B%E4%BE%9D%E7%8F%BE%E5%A0%B4%E5%AE%89%E6%8E%92%E3%80%82%E8%AB%8B%E6%8F%90%E5%89%8D10%E5%88%86%E6%8A%B5%E9%81%94%EF%BC%8C%E5%BA%A7%E4%BD%8D%E4%BB%A5%E6%8E%A5%E5%BE%85%E7%AA%97%E5%8F%A3%E7%A2%BA%E8%AA%8D%E7%82%BA%E6%BA%96%E3%80%82';
     calendar.hidden = false;
   }
   window.ginguiTrack?.('guest_form_success', {inviter_id: inviterId(saved.invitedBy), meeting_choice: saved.date || ''});
   panel.focus();
+}
+const featuredMeetingClosed = new Date() >= new Date('2026-10-23T06:30:00+08:00');
+if (featuredMeetingClosed) {
+  const featuredOption = document.querySelector('#g-date option[value^="2026-10-23"]');
+  featuredOption.disabled = true;
+  featuredOption.textContent += '（已結束報名）';
+}
+if (featuredMeetingClosed || (params.get('meeting') && params.get('meeting') !== '2026-10-23')) {
+  document.querySelector('#g-date + .field-help').textContent = '連結中的場次目前未開放報名，請選擇其他已確認場次，或由接待窗口協助安排。';
 }
 const invitedBy = params.get('invited_by');
 if (invitedBy) {
@@ -212,8 +221,8 @@ if (invitedBy) {
 if (params.get('source') === 'directory_no_result') {
   document.getElementById('g-source').value = '會員名錄：搜尋無結果';
 }
-if (params.get('meeting') === '2026-10-16') {
-  document.getElementById('g-date').value = '2026-10-16（五）06:30｜陳令緯主講';
+if (params.get('meeting') === '2026-10-23' && !featuredMeetingClosed) {
+  document.getElementById('g-date').value = '2026-10-23（五）06:30｜李朵嬅主講';
 }
 const guestForm = document.getElementById('guestForm');
 let formStarted = false;

@@ -439,3 +439,7 @@ footer .gold-line{
 .nav .nav-dd:hover .nav-dd-menu,.nav .nav-dd:focus-within .nav-dd-menu{display:flex}
 .nav .nav-dd-menu a{padding:9px 12px;border-bottom:0;border-radius:8px;white-space:nowrap;display:block}
 .nav .nav-dd-menu a:hover,.nav .nav-dd-menu a.active{background:rgba(255,255,255,.1)}
+
+/* Keep portrait event posters readable without cropping speaker or event details. */
+.focus-card .edm-frame img,.video-archive-card .edm-frame img{object-fit:contain}
+@media(max-width:760px){.focus-card .edm-frame,.video-archive-card .edm-frame{min-height:0;aspect-ratio:1076 / 1522}}
