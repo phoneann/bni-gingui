@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1076 1522" role="img" lang="zh-Hant" aria-labelledby="title desc">
+  <title id="title">10/30 方怡婷主講資訊</title>
+  <desc id="desc">從細節到整體——關於美學的跨領域對話。2026年10月30日星期五上午6點30分，台南 BNI 菁英會所。</desc>
+  <defs>
+    <linearGradient id="paper" x2="1" y2="1">
+      <stop stop-color="#f8f1e2"/>
+      <stop offset="1" stop-color="#e5d0ad"/>
+    </linearGradient>
+    <linearGradient id="gold" x2="1" y2="1">
+      <stop stop-color="#947042"/>
+      <stop offset="1" stop-color="#82613a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1076" height="1522" fill="url(#paper)"/>
+  <rect x="35" y="35" width="1006" height="1452" rx="16" fill="none" stroke="#a47c4c" stroke-width="2"/>
+  <path d="M0 0h1076v270H0z" fill="#212a2a"/>
+  <text x="78" y="116" fill="#f2e5c9" font-family="Noto Sans TC, sans-serif" font-size="32" font-weight="700" letter-spacing="8">BNI 台南市區 · 金貴鈦金分會</text>
+  <text x="78" y="201" fill="#d5b888" font-family="Noto Sans TC, sans-serif" font-size="36" letter-spacing="6">FEATURED SPEAKER</text>
+  <text x="78" y="387" fill="#8b2530" font-family="Noto Sans TC, sans-serif" font-size="112" font-weight="900">10 / 30</text>
+  <line x1="78" y1="435" x2="998" y2="435" stroke="#aa8454" stroke-width="3"/>
+  <text x="78" y="525" fill="#3b342e" font-family="Noto Sans TC, sans-serif" font-size="43" letter-spacing="5">星期五 · 上午 06:30</text>
+  <text x="78" y="682" fill="#272e2e" font-family="Noto Sans TC, sans-serif" font-size="90" font-weight="900">方怡婷</text>
+  <text x="78" y="758" fill="#73583a" font-family="Noto Sans TC, sans-serif" font-size="39">形象造型規劃業代表</text>
+  <text x="78" y="835" fill="#584733" font-family="Noto Sans TC, sans-serif" font-size="34">嗨！親愛的公主殿下造型團隊</text>
+  <rect x="68" y="909" width="940" height="264" rx="16" fill="url(#gold)"/>
+  <text x="105" y="982" fill="#fff9ec" font-family="Noto Sans TC, sans-serif" font-size="32" letter-spacing="5">分享主題</text>
+  <text x="105" y="1061" fill="#fff" font-family="Noto Sans TC, sans-serif" font-size="55" font-weight="700">從細節到整體</text>
+  <text x="105" y="1134" fill="#fff" font-family="Noto Sans TC, sans-serif" font-size="42">關於美學的跨領域對話</text>
+  <text x="78" y="1270" fill="#333a39" font-family="Noto Sans TC, sans-serif" font-size="36" font-weight="700">台南 BNI 菁英會所</text>
+  <text x="78" y="1332" fill="#5c625f" font-family="Noto Sans TC, sans-serif" font-size="29">台南市北區文成路 781-2 號</text>
+  <text x="78" y="1414" fill="#8b2530" font-family="Noto Sans TC, sans-serif" font-size="28">官網資訊圖卡 · 影片與報名資訊以官方公告為準</text>
+</svg>
