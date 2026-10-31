@@ -186,31 +186,49 @@
 const params = new URLSearchParams(location.search);
 const inviterIds = {'謝豐安':'xiefengan','黃昭穎':'huangzhaoying','陳令緯':'chenlingwei','陳以昕':'chenyixin','黃筱涵':'huangxiaohan'};
 const inviterId = (name) => inviterIds[name] || (name ? 'other_member' : 'self_signup');
+const submissionKey = 'ginguiGuestSubmission';
+const submissionMaxAge = 30 * 60 * 1000;
 if (params.get('sent') === '1') {
   let saved = {};
-  try { saved = JSON.parse(sessionStorage.getItem('ginguiGuestSubmission') || '{}'); } catch { saved = {}; }
-  document.getElementById('guestForm').hidden = true;
-  const panel = document.getElementById('successPanel');
-  panel.hidden = false;
-  if (saved.date) {
-    document.getElementById('successSummary').textContent = `已收到 ${saved.date} 的報名資料。接待夥伴會再與你確認場次與座位；送出表單不代表座位已完成確認。`;
+  try { saved = JSON.parse(sessionStorage.getItem(submissionKey) || '{}'); } catch { saved = {}; }
+  const recentSubmission = saved &&
+    (saved.status === 'pending' || saved.status === 'confirmed') &&
+    Number.isFinite(saved.submittedAt) &&
+    saved.submittedAt <= Date.now() &&
+    Date.now() - saved.submittedAt < submissionMaxAge;
+  if (recentSubmission) {
+    document.getElementById('guestForm').hidden = true;
+    const panel = document.getElementById('successPanel');
+    panel.hidden = false;
+    if (saved.date) {
+      document.getElementById('successSummary').textContent = `已收到 ${saved.date} 的報名資料。接待夥伴會再與你確認場次與座位；送出表單不代表座位已完成確認。`;
+    }
+    if (saved.date && saved.date.startsWith('2026-11-06')) {
+      const calendar = document.getElementById('calendarButton');
+      const calendarUrl = new URL('https://calendar.google.com/calendar/render');
+      calendarUrl.search = new URLSearchParams({
+        action: 'TEMPLATE',
+        text: 'BNI 金貴分會例會｜黃鈺峯主講',
+        dates: '20261106T063000/20261106T083000',
+        ctz: 'Asia/Taipei',
+        location: '台南 BNI 菁英會所｜台南市北區文成路781-2號',
+        details: '08:30 為固定例會預計結束時間，實際依現場安排。請提前10分鐘抵達，座位以接待窗口確認為準。'
+      }).toString();
+      calendar.href = calendarUrl.toString();
+      calendar.hidden = false;
+    }
+    if (saved.status === 'pending') {
+      try {
+        sessionStorage.setItem(submissionKey, JSON.stringify({...saved, status: 'confirmed'}));
+        window.ginguiTrack?.('guest_form_success', {inviter_id: inviterId(saved.invitedBy), meeting_choice: saved.date || ''});
+      } catch { /* 儲存空間不可用時仍顯示結果，避免重整重複計數。 */ }
+    }
+    panel.focus();
+  } else {
+    params.delete('sent');
+    const query = params.toString();
+    history.replaceState(null, '', `${location.pathname}${query ? `?${query}` : ''}${location.hash}`);
   }
-  if (saved.date && saved.date.startsWith('2026-11-06')) {
-    const calendar = document.getElementById('calendarButton');
-    const calendarUrl = new URL('https://calendar.google.com/calendar/render');
-    calendarUrl.search = new URLSearchParams({
-      action: 'TEMPLATE',
-      text: 'BNI 金貴分會例會｜黃鈺峯主講',
-      dates: '20261106T063000/20261106T083000',
-      ctz: 'Asia/Taipei',
-      location: '台南 BNI 菁英會所｜台南市北區文成路781-2號',
-      details: '08:30 為固定例會預計結束時間，實際依現場安排。請提前10分鐘抵達，座位以接待窗口確認為準。'
-    }).toString();
-    calendar.href = calendarUrl.toString();
-    calendar.hidden = false;
-  }
-  window.ginguiTrack?.('guest_form_success', {inviter_id: inviterId(saved.invitedBy), meeting_choice: saved.date || ''});
-  panel.focus();
 }
 const featuredMeetingClosed = new Date() >= new Date('2026-11-06T06:30:00+08:00');
 if (featuredMeetingClosed) {
@@ -245,7 +263,9 @@ guestForm.addEventListener('submit', () => {
   const date = document.getElementById('g-date').value;
   const invited = document.getElementById('g-invited').value.trim();
   document.getElementById('g-subject').value = `【金貴來賓報名】${date}｜${invited || '自行報名'}`;
-  sessionStorage.setItem('ginguiGuestSubmission', JSON.stringify({date, invitedBy: invited}));
+  try {
+    sessionStorage.setItem(submissionKey, JSON.stringify({date, invitedBy: invited, submittedAt: Date.now(), status: 'pending'}));
+  } catch { /* 儲存空間不可用也要讓報名表單照常送出。 */ }
   window.ginguiTrack?.('guest_form_submit', {inviter_id: inviterId(invited), meeting_choice: date});
 });
 </script>
