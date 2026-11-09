@@ -6,16 +6,24 @@ const vm = require('node:vm');
 const html = fs.readFileSync(path.join(__dirname, '../docs/join.html'), 'utf8');
 const script = html.match(/<script>\s*(const params = new URLSearchParams\(location\.search\);[\s\S]*?)<\/script>/)?.[1];
 assert.ok(script, 'join form script exists');
-const now = Date.parse('2026-10-31T12:00:00+08:00');
+const optMatch = html.match(/<option value="((\d{4}-\d{2}-\d{2})（五）06:30｜[^"]+主講)"/);
+assert.ok(optMatch, 'featured meeting option exists');
+const activeOptionValue = optMatch[1];
+const activeDate = optMatch[2];
+const cutoffMs = Date.parse(`${activeDate}T06:30:00+08:00`);
+const now = cutoffMs - 24 * 60 * 60 * 1000;
 
-function run(search, saved, existingStore) {
+function run(search, saved, existingStore, customNow = now) {
   const store = existingStore || new Map();
   if (saved !== undefined) store.set('ginguiGuestSubmission', JSON.stringify(saved));
   const elements = new Map();
   const element = (id) => {
     if (!elements.has(id)) elements.set(id, {
       hidden: id === 'successPanel' || id === 'calendarButton',
-      value: '', textContent: '', listeners: {},
+      disabled: id.startsWith('#g-date option'),
+      value: id.startsWith('#g-date option') ? activeOptionValue : '',
+      textContent: id.startsWith('#g-date option') ? activeOptionValue : '',
+      listeners: {},
       addEventListener(event, callback) { this.listeners[event] = callback; },
       focus() { this.focused = true; }
     });
@@ -32,8 +40,8 @@ function run(search, saved, existingStore) {
     setItem(key, value) { store.set(key, value); }
   };
   class TestDate extends Date {
-    constructor(...args) { super(...(args.length ? args : [now])); }
-    static now() { return now; }
+    constructor(...args) { super(...(args.length ? args : [customNow])); }
+    static now() { return customNow; }
   }
   vm.runInNewContext(script, {
     Date: TestDate, document, sessionStorage, URL, URLSearchParams,
@@ -58,13 +66,13 @@ assert.equal(run('?sent=1', { submittedAt: now + 1, status: 'pending' }).element
 assert.equal(run('?sent=1', { submittedAt: now, status: 'other' }).element('successPanel').hidden, true);
 assert.equal(run('?sent=1', { submittedAt: now - 30 * 60 * 1000, status: 'pending' }).element('successPanel').hidden, true);
 
-const stale = run('?sent=1', { date: '2026-11-06', invitedBy: '謝豐安', submittedAt: now - 31 * 60 * 1000, status: 'pending' });
+const stale = run('?sent=1', { date: activeDate, invitedBy: '謝豐安', submittedAt: now - 31 * 60 * 1000, status: 'pending' });
 assert.equal(stale.element('successPanel').hidden, true);
 assert.equal(stale.events.length, 0);
 
 const store = new Map();
 const form = run('?invited_by=%E8%AC%9D%E8%B1%90%E5%AE%89', undefined, store);
-form.element('g-date').value = '2026-11-06（五）06:30｜黃鈺峯主講';
+form.element('g-date').value = activeOptionValue;
 form.element('guestForm').listeners.submit();
 assert.equal(form.events.at(-1).name, 'guest_form_submit');
 assert.equal(form.events.at(-1).params.inviter_id, 'xiefengan');
@@ -83,7 +91,7 @@ assert.equal(reload.element('successPanel').hidden, false);
 assert.equal(reload.events.length, 0);
 
 const blockedStore = {
-  get() { return JSON.stringify({ date: '2026-11-06', submittedAt: now, status: 'pending' }); },
+  get() { return JSON.stringify({ date: activeDate, submittedAt: now, status: 'pending' }); },
   set() { throw new Error('storage blocked'); }
 };
 const blockedReturn = run('?sent=1', undefined, blockedStore);
@@ -92,5 +100,17 @@ assert.equal(blockedReturn.events.length, 0);
 const blockedSubmit = run('', undefined, blockedStore);
 blockedSubmit.element('guestForm').listeners.submit();
 assert.equal(blockedSubmit.events[0].name, 'guest_form_submit');
+
+const optSelector = `#g-date option[value^="${activeDate}"]`;
+const preCutoff = run(`?meeting=${activeDate}`, undefined, undefined, cutoffMs - 18.5 * 3600 * 1000);
+assert.equal(preCutoff.element(optSelector).disabled, false);
+assert.equal(preCutoff.element(optSelector).textContent, activeOptionValue);
+assert.equal(preCutoff.element('g-date').value, activeOptionValue);
+
+const postCutoff = run(`?meeting=${activeDate}`, undefined, undefined, cutoffMs + 60 * 1000);
+assert.equal(postCutoff.element(optSelector).disabled, true);
+assert.equal(postCutoff.element(optSelector).textContent, `${activeOptionValue}（已結束報名）`);
+assert.equal(postCutoff.element('g-date').value, '');
+assert.match(postCutoff.element('#g-date + .field-help').textContent, /未開放報名/);
 
 console.log('join success guard: all scenarios passed');

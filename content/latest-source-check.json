@@ -1,0 +1,13 @@
+{
+  "checked_at": "2026-11-09T10:37:34+08:00",
+  "target_friday": "2026-11-13",
+  "status": "ok_verified_source",
+  "blocked": false,
+  "source_type": "chrome_logged_in_fanpage",
+  "source_receipt_path": "content/speaker-source-20261113.json",
+  "speaker_name": "施雨彤",
+  "meeting_date": "2026-11-13",
+  "source_post_url": "https://www.facebook.com/reel/1316954077140419/",
+  "reel_url": "https://www.facebook.com/reel/1316954077140419/",
+  "message": "已從本機已登入之 Chrome 金貴粉專成功讀取並驗證 2026-11-13 （施雨彤｜從一套訂製西裝，看懂紳士品味）完整主講資訊。"
+}
