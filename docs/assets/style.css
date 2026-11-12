@@ -443,3 +443,24 @@ footer .gold-line{
 /* Keep portrait event posters readable without cropping speaker or event details. */
 .focus-card .edm-frame img,.video-archive-card .edm-frame img{object-fit:contain}
 @media(max-width:760px){.focus-card .edm-frame,.video-archive-card .edm-frame{min-height:0;aspect-ratio:1076 / 1522}}
+
+/* 2026-11-12: keep the desktop identity while restoring mobile navigation. */
+.mobile-menu{display:none}
+a:focus-visible,button:focus-visible,.mobile-menu summary:focus-visible{outline:3px solid var(--gingui-gold);outline-offset:3px}
+.hero p.lead{color:#f2eee8}
+@media(max-width:760px){
+  .nav .wrap{gap:8px}
+  .nav .brand{min-width:0;gap:7px}
+  .nav .brand img.bni-logo{height:29px}
+  .nav .brand img.gingui-logo{height:32px}
+  .nav .cta{margin-left:auto;flex:none;padding:8px 12px;white-space:nowrap;font-size:.82rem}
+  .mobile-menu{display:block;position:relative;flex:none}
+  .mobile-menu summary{display:grid;place-items:center;width:42px;height:42px;border:1px solid rgba(208,183,138,.7);border-radius:8px;color:#f4e7d5;line-height:1;cursor:pointer;list-style:none;font-size:20px}
+  .mobile-menu summary::-webkit-details-marker{display:none}
+  .mobile-menu-links{position:absolute;right:0;top:48px;z-index:80;width:190px;padding:6px;background:#211f1c;border:1px solid rgba(208,183,138,.45);border-radius:9px;box-shadow:0 12px 30px rgba(0,0,0,.28)}
+  .mobile-menu-links a{display:block;padding:10px 12px;border-radius:5px;font-size:.92rem;line-height:1.5}
+  .mobile-menu-links a:hover,.mobile-menu-links a:focus-visible{background:rgba(208,183,138,.16)}
+  .hero .btn{min-height:48px}
+}
+@media(max-width:360px){.nav .wrap{padding:0 14px}.nav .brand img.bni-logo{height:24px}.nav .brand img.gingui-logo{height:28px}.nav .cta{padding:7px 9px;font-size:.76rem}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn,.card-link,.need-card{transition:none}}
