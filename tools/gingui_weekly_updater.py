@@ -53,9 +53,6 @@ REQUIRED_SOURCE_FIELDS = [
     "topic_svg_line1",
     "topic_svg_line2",
     "topic_paragraphs",
-    "partners",
-    "ideal_referral",
-    "dream_referral",
     "reel_url",
     "source_post_url",
     "fetched_at",
@@ -359,28 +356,43 @@ def parse_speaker_from_chrome_info(
         if isinstance(main_page, dict):
             text = str(main_page.get("text") or "")
 
-    date_token = f"日期｜{target_friday.month}月{target_friday.day}日"
-    if date_token not in text and target_friday.isoformat() not in text:
+    date_pattern = rf"(?<!\d)(?:日期[｜|：:]\s*)?{target_friday.month}(?:月|[/／])\s*{target_friday.day}(?:日)?(?!\d)"
+    date_match = re.search(date_pattern, text)
+    if not date_match and target_friday.isoformat() not in text:
         return None
 
-    # Isolate the post segment containing the target date
-    idx = text.find(date_token)
-    if idx == -1:
-        idx = text.find(target_friday.isoformat())
-    segment = text[max(0, idx - 600) : min(len(text), idx + 900)]
+    # Stay within one fanpage post. Dates often appear at the *end* of a caption;
+    # a symmetric window can accidentally borrow fields from the next post.
+    idx = date_match.start() if date_match else text.find(target_friday.isoformat())
+    boundaries = list(re.finditer(r"(?m)^BNI 台南市區-金貴鈦金分會(?:和|──)", text))
+    starts = [m.start() for m in boundaries if m.start() < idx]
+    if not starts:
+        return None
+    start = starts[-1]
+    ends = [m.start() for m in boundaries if m.start() > idx]
+    end = ends[0] if ends else min(len(text), idx + 350)
+    segment = text[start:end]
 
     title_m = re.search(r"【([^】\n]{4,40})】", segment)
-    speaker_m = re.search(r"主講(?:人|者)[｜|：:\s]*([^\s\n｜|]+)", segment)
-    prof_m = re.search(r"專業領域[｜|：:\s]*([^\s\n｜|]+)", segment)
-    comp_m = re.search(r"公司[｜|：:\s]*([^\s\n｜|]+)", segment)
+    speaker_m = re.search(r"主講(?:人|者)[｜|：:]\s*([^\s\n｜|]+)", segment)
+    prof_m = re.search(r"(?m)^[^\n]{0,16}(?:專業領域|專業)[｜|：:]\s*([^\s\n｜|]+)", segment)
+    comp_m = re.search(r"(?m)^[^\n]{0,16}公司[｜|：:]\s*([^\s\n｜|]+)", segment)
 
-    if not (title_m and speaker_m and prof_m and comp_m):
+    if not (speaker_m and prof_m and comp_m):
         return None
 
-    headline = title_m.group(1).strip()
+    headline_is_official_title = bool(title_m)
+    if title_m:
+        headline = title_m.group(1).strip()
+    else:
+        # No announced title: use a short phrase actually present in this post.
+        emphasis = list(re.finditer(r"(?m)^[🔥💡]\s*([^，,！!。\n]{4,32})", segment))
+        if not emphasis:
+            return None
+        headline = emphasis[-1].group(1).strip()
     speaker = speaker_m.group(1).strip()
     prof_raw = prof_m.group(1).strip()
-    profession = prof_raw if prof_raw.endswith("代表") else f"{prof_raw}代表"
+    profession = prof_raw
     company = comp_m.group(1).strip()
 
     if "，" in headline:
@@ -431,8 +443,17 @@ def parse_speaker_from_chrome_info(
                 reel_url += "/"
             break
 
-    if not (partners and ideal_ref and dream_ref and reel_url):
+    if not reel_url:
         return None
+
+    audience_items = re.findall(r"(?m)^🔸\s*([^\n]+)", segment)
+    audience = "、".join(item.strip() for item in audience_items)
+
+    # Use the official speaker-description sentence rather than a generic title
+    # sentence; it describes the actual subject when no title was announced.
+    description = re.search(rf"{re.escape(speaker)}將([^\n]+)", segment)
+    if description:
+        paragraph = f"這支影片為 {md_short} 主講的演講前預告。{speaker}將{description.group(1).strip()}"
 
     return {
         "meeting_date": target_friday.isoformat(),
@@ -443,6 +464,8 @@ def parse_speaker_from_chrome_info(
         "topic_svg_line1": svg_line1,
         "topic_svg_line2": svg_line2,
         "topic_paragraphs": [paragraph],
+        "headline_is_official_title": headline_is_official_title,
+        "audience": audience,
         "partners": partners,
         "ideal_referral": ideal_ref,
         "dream_referral": dream_ref,
@@ -539,7 +562,13 @@ def cmd_fetch_source(args: argparse.Namespace) -> int:
 
     js_err_str = str(chrome_info.get("js_error") or "").strip()
 
-    if js_err_str:
+    if chrome_info.get("found_tab") and chrome_info.get("body_excerpt"):
+        status = "blocked_source_format"
+        msg = (
+            f"已在 Chrome 讀到金貴粉專文字，但未能從同一則貼文完整核對 "
+            f"{target_friday.isoformat()} 講者與 Reel；需人工核對來源格式。"
+        )
+    elif js_err_str:
         status = "blocked_chrome_js_disabled"
         msg = (
             f"受阻：已連線至本機已登入 Facebook 之 Chrome 分頁（{chrome_info.get('url') or FANPAGE_URL}），"
@@ -618,6 +647,7 @@ def render_focus_svg(payload: dict[str, Any]) -> str:
     line1 = html.escape(payload["topic_svg_line1"])
     line2 = html.escape(payload["topic_svg_line2"])
     headline = html.escape(payload["topic_headline"])
+    topic_label = "分享主題" if payload.get("headline_is_official_title", True) else "分享重點"
 
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1076 1522" role="img" lang="zh-Hant" aria-labelledby="title desc">
   <title id="title">{md_short} {speaker}主講資訊</title>
@@ -644,7 +674,7 @@ def render_focus_svg(payload: dict[str, Any]) -> str:
   <text x="78" y="758" fill="#73583a" font-family="Noto Sans TC, sans-serif" font-size="39">{profession}</text>
   <text x="78" y="835" fill="#584733" font-family="Noto Sans TC, sans-serif" font-size="34">{company}</text>
   <rect x="68" y="909" width="940" height="264" rx="16" fill="url(#gold)"/>
-  <text x="105" y="982" fill="#fff9ec" font-family="Noto Sans TC, sans-serif" font-size="32" letter-spacing="5">分享主題</text>
+  <text x="105" y="982" fill="#fff9ec" font-family="Noto Sans TC, sans-serif" font-size="32" letter-spacing="5">{topic_label}</text>
   <text x="105" y="1061" fill="#fff" font-family="Noto Sans TC, sans-serif" font-size="55" font-weight="700">{line1}</text>
   <text x="105" y="1134" fill="#fff" font-family="Noto Sans TC, sans-serif" font-size="42">{line2}</text>
   <text x="78" y="1270" fill="#333a39" font-family="Noto Sans TC, sans-serif" font-size="36" font-weight="700">台南 BNI 菁英會所</text>
@@ -790,9 +820,20 @@ def apply_speaker_update(docs_dir: pathlib.Path, payload: dict[str, Any], today_
     company = payload["company"].strip()
     headline = payload["topic_headline"].strip()
     paragraphs = [p.strip() for p in payload["topic_paragraphs"] if p.strip()]
-    partners = payload["partners"].strip()
-    ideal_ref = payload["ideal_referral"].strip()
-    dream_ref = payload["dream_referral"].strip()
+    partners = str(payload.get("partners") or "").strip()
+    ideal_ref = str(payload.get("ideal_referral") or "").strip()
+    dream_ref = str(payload.get("dream_referral") or "").strip()
+    audience = str(payload.get("audience") or "").strip()
+    topic_label = "分享主題" if payload.get("headline_is_official_title", True) else "分享重點"
+    detail_items = [
+        f"合作夥伴：{partners}" if partners else "",
+        f"理想引薦：{ideal_ref}" if ideal_ref else "",
+        f"夢幻引薦：{dream_ref}" if dream_ref else "",
+        f"歡迎參與：{audience}" if audience else "",
+    ]
+    detail_html = "。".join(html.escape(item) for item in detail_items if item)
+    detail_block = f'        <p style="color:var(--gray-90);font-size:.92rem">{detail_html}。</p>' if detail_html else ""
+    video_partner_block = f'        <p class="meta">合作夥伴：{html.escape(partners)}</p>' if partners else ""
     reel_url = payload["reel_url"].strip()
     if not reel_url.endswith("/"):
         reel_url += "/"
@@ -824,10 +865,9 @@ def apply_speaker_update(docs_dir: pathlib.Path, payload: dict[str, Any], today_
       <div class="body">
         <div class="week">{ymd}（五）06:30</div>
         <h3>{html.escape(headline)}</h3>
+        <p class="video-note">{topic_label}依金貴分會官方主講預告整理。</p>
         <p class="speaker">講者：<b>{html.escape(speaker)}・{html.escape(prof_short)}</b>（{html.escape(company)}）</p>
-        <p style="color:var(--gray-90);font-size:.92rem">
-          合作夥伴：{html.escape(partners)}。理想引薦：{html.escape(ideal_ref)}。夢幻引薦：{html.escape(dream_ref)}。
-        </p>
+{detail_block}
         <p class="video-note">點擊左側播放按鈕，會以直式完整畫面開啟影片；這支主講預告也已收錄於影音紀錄，方便回看。</p>
         <p class="video-note">左側資訊圖卡由本站依官方預告整理製作。</p>
         <div class="btns compact-btns">
@@ -885,7 +925,7 @@ def apply_speaker_update(docs_dir: pathlib.Path, payload: dict[str, Any], today_
         <h3>{html.escape(headline)}</h3>
         <p class="speaker">主講者：<b>{html.escape(speaker)}</b>・{html.escape(company)}</p>
         <p>{html.escape(summary_text)}</p>
-        <p class="meta">合作夥伴：{html.escape(partners)}</p>
+{video_partner_block}
         <p class="video-note">影片由金貴分會官方粉絲團發布；若嵌入播放器無法載入，可直接前往 Facebook 觀看。</p>
         <p class="video-note">圖卡由本站依官方預告整理製作。</p>
         <div class="btns compact-btns">
@@ -1142,6 +1182,14 @@ def verify_site_status(
             src_errs = validate_source_payload(src_payload)
             if src_errs:
                 upcoming_missing_reasons.append(f"{source_receipt_file.name} 欄位不完整: {'; '.join(src_errs)}")
+            else:
+                if src_payload["meeting_date"] != target_ymd:
+                    upcoming_missing_reasons.append("來源日期與目標場次不符")
+                if join_option_speaker != src_payload["speaker_name"]:
+                    upcoming_missing_reasons.append("報名場次講者與來源回執不符")
+                for page_name, page_text in [("docs/index.html", index_html), ("docs/videos.html", videos_html)]:
+                    if src_payload["speaker_name"] not in page_text or src_payload["reel_url"] not in page_text:
+                        upcoming_missing_reasons.append(f"{page_name} 講者或 Reel 與來源回執不符")
         except Exception as exc:
             upcoming_missing_reasons.append(f"{source_receipt_file.name} 讀取失敗: {exc}")
 
