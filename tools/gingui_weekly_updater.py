@@ -7,7 +7,7 @@
    必定回傳非 0（exit code 2），禁止排程標記為 `verified_ok`。
 2. Facebook 粉專來源讀取：支援讀取官方粉專與 Reels 頁面、檢查已開啟之 Chrome 分頁（唯讀，不索取密碼、
    不繞過驗證、不讀 Cookie）及讀取本機已驗證之來源回執 `content/speaker-source-YYYYMMDD.json`。
-   遇到登入牆或未公告時，明確標示「受阻」（`blocked_login_required` / `no_upcoming_announcement`）。
+   遇到登入牆或未公告時，明確標示「受阻」（`login_required` / `source_not_announced`）。
 3. 嚴格遵守 `UPDATE_WORKFLOW.md`：
    - 有已確認下一場來源時：同步更新 `docs/index.html`、`docs/videos.html`、`docs/join.html`、
      `docs/assets/photos/focus-YYYYMMDD.svg` 與 `docs/sitemap.xml`。
@@ -44,7 +44,7 @@ FANPAGE_ID = "100025054496051"
 FANPAGE_URL = f"https://www.facebook.com/profile.php?id={FANPAGE_ID}"
 FANPAGE_REELS_URL = f"https://www.facebook.com/profile.php?id={FANPAGE_ID}&sk=reels_tab"
 
-REQUIRED_SOURCE_FIELDS = [
+SINGLE_SPEAKER_FIELDS = [
     "meeting_date",
     "speaker_name",
     "profession",
@@ -57,6 +57,54 @@ REQUIRED_SOURCE_FIELDS = [
     "source_post_url",
     "fetched_at",
 ]
+
+
+REQUIRED_SOURCE_FIELDS = {
+    "single_speaker": SINGLE_SPEAKER_FIELDS,
+    "theme_day": ["title", "featured_members", "meeting_date", "reel_url",
+                  "source_post_url", "fetched_at", "topic_paragraphs"],
+}
+FIXED_MEETING_NOTE = "依固定會務資料，實際以接待窗口通知為準"
+
+
+def presentation_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    """Derive display values without changing or fabricating source fields."""
+    if payload.get("format", "single_speaker") != "theme_day":
+        return payload
+    members = payload["featured_members"]
+    return {**payload, "speaker_name": "、".join(m["name"] for m in members),
+            "company": "、".join(m["company"] for m in members),
+            "profession": "分享夥伴", "topic_headline": payload["title"],
+            "topic_svg_line1": payload["title"], "topic_svg_line2": "跨產業合作・互相引薦"}
+
+
+def meeting_label(payload: dict[str, Any]) -> str:
+    p = presentation_payload(payload)
+    return p["title"] if p.get("format") == "theme_day" else p["speaker_name"] + "主講"
+
+
+def build_theme_day_source(caption: str, members: list[dict[str, Any]],
+                           target: datetime.date, reel_url: str,
+                           fetched_at: str, paragraphs: list[str]) -> dict[str, Any]:
+    """Build from one Reel caption and its manually verified frame receipts only.
+
+    Never accept a whole feed: adjacent dates or mismatched Reel evidence fail closed.
+    """
+    dates = re.findall(r"(?<!\d)(\d{1,2})[/／](\d{1,2})(?!\d)", caption)
+    if not dates or any((int(m), int(d)) != (target.month, target.day) for m, d in dates):
+        raise ValueError("caption 日期與目標場次不符或混入相鄰貼文")
+    title = re.search(r"[「【]([^」】]*主題日)[」】]", caption)
+    if not title:
+        raise ValueError("caption 缺少主題日名稱")
+    payload = {"format": "theme_day", "title": title.group(1),
+               "featured_members": members, "meeting_date": target.isoformat(),
+               "reel_url": reel_url, "source_post_url": reel_url,
+               "fetched_at": fetched_at, "topic_paragraphs": paragraphs,
+               "source_excerpt": caption}
+    errors = validate_source_payload(payload)
+    if errors:
+        raise ValueError("; ".join(errors))
+    return payload
 
 
 def now_tpe(override_iso: str | None = None) -> datetime.datetime:
@@ -104,10 +152,16 @@ def extract_reel_id(reel_url: str) -> str:
 
 def validate_source_payload(payload: dict[str, Any]) -> list[str]:
     errors: list[str] = []
-    for field in REQUIRED_SOURCE_FIELDS:
+    fmt = payload.get("format", "single_speaker")
+    if fmt not in REQUIRED_SOURCE_FIELDS:
+        return [f"不支援的 format: {fmt}"]
+    for field in REQUIRED_SOURCE_FIELDS[fmt]:
         val = payload.get(field)
         if val is None or (isinstance(val, str) and not val.strip()):
             errors.append(f"缺少必要欄位: {field}")
+    for field in REQUIRED_SOURCE_FIELDS[fmt]:
+        if field not in ("featured_members", "topic_paragraphs") and field in payload and not isinstance(payload[field], str):
+            errors.append(f"{field} 必須為字串")
     meeting_date_str = str(payload.get("meeting_date", "")).strip()
     try:
         d = datetime.date.fromisoformat(meeting_date_str)
@@ -127,6 +181,54 @@ def validate_source_payload(payload: dict[str, Any]) -> list[str]:
     paragraphs = payload.get("topic_paragraphs")
     if not isinstance(paragraphs, list) or not paragraphs or not all(isinstance(p, str) and p.strip() for p in paragraphs):
         errors.append("topic_paragraphs 必須為非空字串陣列")
+
+    if fmt == "theme_day":
+        members = payload.get("featured_members")
+        if not isinstance(members, list) or not members:
+            errors.append("featured_members 必須至少一人")
+        else:
+            for i, member in enumerate(members):
+                if not isinstance(member, dict):
+                    errors.append(f"featured_members[{i}] 必須為物件")
+                    continue
+                if not all(isinstance(member.get(k), str) and member[k].strip() for k in ("name", "company")):
+                    errors.append(f"featured_members[{i}] 缺 name/company")
+                    continue
+                if not any(isinstance(member.get(k), str) and member[k].strip() for k in ("role", "profession")):
+                    errors.append(f"featured_members[{i}] 缺 role 或 profession")
+                    continue
+                evidence = member.get("evidence")
+                if not isinstance(evidence, dict) or evidence.get("reel_url") != reel_url:
+                    errors.append(f"featured_members[{i}] 缺同一 Reel evidence")
+                    continue
+                if evidence.get("type") == "caption":
+                    excerpt = evidence.get("excerpt", "")
+                    if not isinstance(excerpt, str) or not all(member.get(k, "") in excerpt for k in ("name", "company")) or not (member.get("role") or member.get("profession") or "") in excerpt:
+                        errors.append(f"featured_members[{i}] caption evidence 缺姓名公司職務")
+                    if not isinstance(payload.get("source_excerpt", ""), str) or not isinstance(excerpt, str) or excerpt not in payload.get("source_excerpt", ""):
+                        errors.append(f"featured_members[{i}] caption evidence 非本篇原文")
+                elif evidence.get("type") == "video_frame":
+                    seconds = evidence.get("seconds")
+                    if isinstance(seconds, bool) or not isinstance(seconds, (int, float)) or not 0 <= seconds < 86400:
+                        errors.append(f"featured_members[{i}] video_frame 缺有效秒數")
+                    if not re.fullmatch(r"[a-f0-9]{64}", str(evidence.get("sha256", ""))):
+                        errors.append(f"featured_members[{i}] video_frame 缺截圖 sha256")
+                else:
+                    errors.append(f"featured_members[{i}] evidence type 不支援")
+        # When a caption is supplied, its dated announcement must be for this meeting only.
+        excerpt = payload.get("source_excerpt", "")
+        if not isinstance(excerpt, str):
+            errors.append("source_excerpt 必須為字串")
+        elif excerpt:
+            dates = re.findall(r"(?<!\d)(\d{1,2})[/／](\d{1,2})(?!\d)", excerpt)
+            try:
+                target = datetime.date.fromisoformat(meeting_date_str)
+                if not dates or any((int(m), int(day)) != (target.month, target.day) for m, day in dates):
+                    errors.append("source_excerpt 日期與目標不符或混入相鄰貼文")
+            except ValueError:
+                pass
+        if source_post_url.rstrip("/") != reel_url.rstrip("/"):
+            errors.append("theme_day source_post_url 必須指向同一 Reel")
 
     return errors
 
@@ -475,6 +577,23 @@ def parse_speaker_from_chrome_info(
     }
 
 
+
+def classify_source_status(chrome_info: dict[str, Any], target: datetime.date) -> str:
+    if not chrome_info.get("checked"):
+        return "browser_unreadable" if chrome_info.get("error") else "not_checked_http_only"
+    text = str(chrome_info.get("body_excerpt") or (chrome_info.get("main_page") or {}).get("text") or "")
+    if chrome_info.get("login_required") or "/login" in str(chrome_info.get("url", "")) or bool(re.search(r"登入以繼續|必須先登入|log in to continue", text, re.I)):
+        return "login_required"
+    if chrome_info.get("js_error") or not chrome_info.get("found_tab") or not text:
+        return "browser_unreadable"
+    date = rf"(?<!\d){target.month}[/／]\s*{target.day}(?!\d)"
+    if re.search(date, text) or target.isoformat() in text:
+        if not chrome_info.get("video_checked") and ("主題日" in text or not all(re.search(p, text) for p in (r"主講(?:人|者)[｜|：:]", r"公司[｜|：:]", r"專業[｜|：:]"))):
+            return "caption_incomplete_video_unchecked"
+        return "parser_unsupported_format"
+    return "source_not_announced"
+
+
 def cmd_fetch_source(args: argparse.Namespace) -> int:
     ref_dt = now_tpe(args.now)
     target_friday = (
@@ -492,7 +611,7 @@ def cmd_fetch_source(args: argparse.Namespace) -> int:
         try:
             payload = json.loads(receipt_path.read_text(encoding="utf-8"))
             errs = validate_source_payload(payload)
-            if not errs:
+            if not errs and payload["meeting_date"] == target_friday.isoformat():
                 result = {
                     "checked_at": ref_dt.isoformat(timespec="seconds"),
                     "target_friday": target_friday.isoformat(),
@@ -500,11 +619,11 @@ def cmd_fetch_source(args: argparse.Namespace) -> int:
                     "blocked": False,
                     "source_type": "local_verified_receipt",
                     "source_receipt_path": str(receipt_path.relative_to(REPO_ROOT)),
-                    "speaker_name": payload["speaker_name"],
+                    "speaker_name": presentation_payload(payload)["speaker_name"],
                     "meeting_date": payload["meeting_date"],
                     "source_post_url": payload["source_post_url"],
                     "reel_url": payload["reel_url"],
-                    "message": f"已取得 {target_friday.isoformat()}（{payload['speaker_name']}）完整驗證來源回執。",
+                    "message": f"已取得 {target_friday.isoformat()}（{presentation_payload(payload)['speaker_name']}）完整驗證來源回執。",
                 }
                 latest_check_path.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
                 print(json.dumps(result, ensure_ascii=False, indent=2))
@@ -516,13 +635,6 @@ def cmd_fetch_source(args: argparse.Namespace) -> int:
     chrome_info: dict[str, Any] = {"checked": False}
     if args.check_open_chrome:
         chrome_info = inspect_open_chrome_fanpage()
-        if not chrome_info.get("found_tab") and (CONTENT_DIR / "chrome-fanpage-inspection.json").exists():
-            try:
-                cached = json.loads((CONTENT_DIR / "chrome-fanpage-inspection.json").read_text(encoding="utf-8"))
-                if cached.get("found_tab") and not cached.get("js_error"):
-                    chrome_info = cached
-            except Exception:
-                pass
         if chrome_info.get("found_tab") and chrome_info.get("body_excerpt"):
             parsed = parse_speaker_from_chrome_info(chrome_info, target_friday, ref_dt)
             if parsed and not validate_source_payload(parsed):
@@ -551,49 +663,16 @@ def cmd_fetch_source(args: argparse.Namespace) -> int:
     fanpage_http = fetch_http_url(FANPAGE_URL)
     reels_http = fetch_http_url(FANPAGE_REELS_URL)
 
-    network_blocked = (
-        not fanpage_http.get("ok")
-        and fanpage_http.get("error_type") == "network_error"
-        and not reels_http.get("ok")
-    )
-    login_blocked = bool(
-        fanpage_http.get("login_wall_detected") or reels_http.get("login_wall_detected")
-    )
-
-    js_err_str = str(chrome_info.get("js_error") or "").strip()
-
-    if chrome_info.get("found_tab") and chrome_info.get("body_excerpt"):
-        status = "blocked_source_format"
-        msg = (
-            f"已在 Chrome 讀到金貴粉專文字，但未能從同一則貼文完整核對 "
-            f"{target_friday.isoformat()} 講者與 Reel；需人工核對來源格式。"
-        )
-    elif js_err_str:
-        status = "blocked_chrome_js_disabled"
-        msg = (
-            f"受阻：已連線至本機已登入 Facebook 之 Chrome 分頁（{chrome_info.get('url') or FANPAGE_URL}），"
-            f"但 Chrome 回傳「{js_err_str}」，且依安全規範不得讀取 Cookie／憑證或自行擴大 Chrome 權限，"
-            f"目前無法自動讀取 {target_friday.isoformat()} 主講者貼文與預告 Reel。"
-        )
-    elif network_blocked:
-        status = "blocked_network"
-        msg = (
-            f"受阻：無法連線至 Facebook 粉專（{fanpage_http.get('error')}），"
-            f"且本機尚無 {target_friday.isoformat()} 已驗證講者來源檔（{receipt_path.name}）。"
-        )
-    elif login_blocked:
-        status = "blocked_login_required"
-        msg = (
-            f"受阻：金貴會 Facebook 粉專（id={FANPAGE_ID}）與 Reels 頁面要求登入驗證，"
-            "依安全規範不得繞過驗證或索取密碼；目前無法自動讀取 "
-            f"{target_friday.isoformat()} 主講者貼文與預告 Reel。"
-        )
-    else:
-        status = "no_upcoming_announcement"
-        msg = (
-            f"受阻：已檢查金貴會來源，但尚未發現 {target_friday.isoformat()} "
-            "完整主講者公告與預告 Reel，依規定不臆測日期或講者。"
-        )
+    status = classify_source_status(chrome_info, target_friday)
+    messages = {
+        "not_checked_http_only": "僅做 HTTP 檢查，尚未檢查瀏覽器與影片，不判定登入或未公告。",
+        "caption_incomplete_video_unchecked": "目標 caption 資訊不足，必須檢查同一支 Reel 字卡與字幕並截圖存證。",
+        "parser_unsupported_format": "目標來源可讀但解析器不支援格式，需核對同篇公告。",
+        "source_not_announced": "瀏覽器可讀，目前可見範圍未找到目標公告；不臆測下一場資訊。",
+        "browser_unreadable": "瀏覽器頁面無法讀取，尚不能判定來源未公告。",
+        "login_required": "瀏覽器明確要求登入，停止並回報。",
+    }
+    msg = messages[status]
 
     result = {
         "checked_at": ref_dt.isoformat(timespec="seconds"),
@@ -637,7 +716,42 @@ def cmd_fetch_source(args: argparse.Namespace) -> int:
     return 2
 
 
+
+def render_theme_focus_svg(payload: dict[str, Any]) -> str:
+    d = datetime.date.fromisoformat(payload["meeting_date"])
+    e = html.escape
+    members = payload["featured_members"]
+    blocks = []
+    step = min(260, 660 / len(members))
+    size = min(64, step / 3)
+    for i, member in enumerate(members):
+        y = 650 + i * step
+        company_size = min(32, 900 / max(len(member["company"]), 1))
+        blocks.append(f'<text x="78" y="{y}" fill="#f1dfba" font-size="{size}" font-weight="800">{e(member["name"])} · {e(member.get("role") or member["profession"])}</text>'
+                      f'<text x="78" y="{y + size + 14}" fill="#d3b783" font-size="{company_size}">{e(member["company"])}</text>')
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1076 1522" role="img" lang="zh-Hant" aria-labelledby="title desc">
+<title id="title">{format_month_day(d)} {e(payload["title"])}｜分享夥伴</title>
+<desc id="desc">{'；'.join(e(m['name']+' '+m['company']+' '+(m.get('role') or m['profession'])) for m in members)}。{FIXED_MEETING_NOTE}。</desc>
+<rect width="1076" height="1522" fill="#212a2a"/>
+<rect x="35" y="35" width="1006" height="1452" rx="16" fill="none" stroke="#a47c4c" stroke-width="2"/>
+<g font-family="Noto Sans TC, sans-serif">
+<text x="78" y="116" fill="#f2e5c9" font-size="32" letter-spacing="8">BNI 台南市區 · 金貴分會</text>
+<text x="78" y="260" fill="#d5b888" font-size="100" font-weight="900">{format_month_day_padded(d)}</text>
+<text x="78" y="365" fill="#fff" font-size="70" font-weight="900">{e(payload['title'])}</text>
+<rect x="78" y="415" width="920" height="100" rx="12" fill="#8b2530"/>
+<text x="110" y="480" fill="#fff" font-size="42">{e(payload["title"])}｜分享夥伴</text>
+{''.join(blocks)}
+<text x="78" y="1200" fill="#d5b888" font-size="35">星期五 · 上午 06:30</text>
+<text x="78" y="1260" fill="#f2e5c9" font-size="32">台南 BNI 菁英會所 · NT$400 含早餐</text>
+<text x="78" y="1320" fill="#d5b888" font-size="29">台南市北區文成路 781-2 號</text>
+<text x="78" y="1390" fill="#f2e5c9" font-size="27">{FIXED_MEETING_NOTE}</text>
+<text x="78" y="1450" fill="#d5b888" font-size="25">本站依官方 Reel 與字卡整理製作</text>
+</g></svg>\n'''
+
+
 def render_focus_svg(payload: dict[str, Any]) -> str:
+    if payload.get("format") == "theme_day":
+        return render_theme_focus_svg(payload)
     d = datetime.date.fromisoformat(payload["meeting_date"])
     md_short = format_month_day(d)
     md_padded = format_month_day_padded(d)
@@ -768,7 +882,7 @@ def apply_close_expired(docs_dir: pathlib.Path, today_str: str) -> dict[str, Any
 
     # Update static <option> if not already disabled
     new_join_html = re.sub(
-        r'<option value="(\d{4}-\d{2}-\d{2}（五）06:30｜[^"]+主講)">(\1)</option>',
+        r'<option value="(\d{4}-\d{2}-\d{2}（五）06:30｜[^"]+)">(\1)</option>',
         r'<option value="\1" disabled>\1（已結束報名）</option>',
         new_join_html,
     )
@@ -811,6 +925,14 @@ def apply_speaker_update(docs_dir: pathlib.Path, payload: dict[str, Any], today_
     if errs:
         raise ValueError("講者來源 JSON 驗證失敗: " + "; ".join(errs))
 
+    payload = presentation_payload(payload)
+    theme = payload.get("format") == "theme_day"
+    label = meeting_label(payload)
+    member_html = "".join(
+        f'<p class="speaker"><b>{html.escape(m["name"])}</b>・{html.escape(m["company"])}｜{html.escape(m.get("role") or m["profession"])}</p>'
+        for m in payload.get("featured_members", [])
+    )
+    fixed_note = f'<p class="video-note">時間、地址與費用{FIXED_MEETING_NOTE}。</p>' if theme else ""
     d = datetime.date.fromisoformat(payload["meeting_date"])
     ymd = d.isoformat()
     compact = d.strftime("%Y%m%d")
@@ -853,22 +975,24 @@ def apply_speaker_update(docs_dir: pathlib.Path, payload: dict[str, Any], today_
     prof_short = profession[:-2] if profession.endswith("代表") else profession
     new_focus_section = f"""<section class="focus-strip">
   <div class="wrap">
-    <div class="kicker">UPCOMING FEATURED SPEAKER</div>
-    <h2 style="margin-bottom:20px">近期主講</h2>
+    <div class="kicker">{'UPCOMING THEME DAY' if theme else 'UPCOMING FEATURED SPEAKER'}</div>
+    <h2 style="margin-bottom:20px">{html.escape(payload['title']) + '｜分享夥伴' if theme else '近期主講'}</h2>
     <div class="focus-card video-focus-card">
       <div class="poster reel-frame edm-frame" id="home-reel-{compact}">
-        <img src="{svg_rel}" alt="{md_short} {html.escape(speaker)}主講資訊圖卡：{html.escape(headline)}">
-        <button class="reel-load" type="button" data-reel-target="home-reel-{compact}" data-facebook-url="{reel_url}" data-reel-title="{html.escape(speaker)}主講預告：{html.escape(headline)}">
-          <span aria-hidden="true">▶</span> 播放主講影片
+        <img src="{svg_rel}" alt="{md_short} {html.escape(label)}資訊圖卡：{html.escape(headline)}">
+        <button class="reel-load" type="button" data-reel-target="home-reel-{compact}" data-facebook-url="{reel_url}" data-reel-title="{html.escape(label)}預告：{html.escape(headline)}">
+          <span aria-hidden="true">▶</span> {'播放主題日影片' if theme else '播放主講影片'}
         </button>
       </div>
       <div class="body">
         <div class="week">{ymd}（五）06:30</div>
         <h3>{html.escape(headline)}</h3>
-        <p class="video-note">{topic_label}依金貴分會官方主講預告整理。</p>
-        <p class="speaker">講者：<b>{html.escape(speaker)}・{html.escape(prof_short)}</b>（{html.escape(company)}）</p>
+        <p class="video-note">{topic_label}依金貴分會官方{'主題日' if theme else '主講'}預告整理。</p>
+        {member_html if theme else f'<p class="speaker">講者：<b>{html.escape(speaker)}・{html.escape(prof_short)}</b>（{html.escape(company)}）</p>'}
+        {fixed_note}
+        {f'<p>{html.escape(paragraphs[0])}</p>' if theme else ''}
 {detail_block}
-        <p class="video-note">點擊左側播放按鈕，會以直式完整畫面開啟影片；這支主講預告也已收錄於影音紀錄，方便回看。</p>
+        <p class="video-note">點擊左側播放按鈕，會以直式完整畫面開啟影片；這支{'主題日' if theme else '主講'}預告也已收錄於影音紀錄，方便回看。</p>
         <p class="video-note">左側資訊圖卡由本站依官方預告整理製作。</p>
         <div class="btns compact-btns">
           <a href="join.html?meeting={ymd}" class="btn btn-red" data-track="guest_registration_click" data-track-label="近期主講報名">預約 {md_short} 例會</a>
@@ -912,18 +1036,19 @@ def apply_speaker_update(docs_dir: pathlib.Path, payload: dict[str, Any], today_
         summary_text = paragraphs[0] if paragraphs else f"這支影片為 {md_short} 主講的演講前預告。"
         month_en = d.strftime("%B").upper()
         kicker_line = f'<div class="kicker">{d.year} {month_en}</div>'
-        card_body = f"""    <h2 style="margin-bottom:20px">{html.escape(speaker)}｜{html.escape(prof_short)}・主講預告</h2>
+        card_body = f"""    <h2 style="margin-bottom:20px">{html.escape(payload['title']) + '｜分享夥伴' if theme else html.escape(speaker) + '｜' + html.escape(prof_short) + '・主講預告'}</h2>
     <article class="video-archive-card">
       <div class="reel-frame edm-frame" id="{archive_id}">
-        <img src="{svg_rel}" alt="{html.escape(speaker)} {md_short} 主講資訊圖卡：{html.escape(headline)}">
-        <button class="reel-load" type="button" data-reel-target="{archive_id}" data-facebook-url="{reel_url}" data-reel-title="{html.escape(speaker)}主講預告：{html.escape(headline)}">
+        <img src="{svg_rel}" alt="{html.escape(label)} {md_short} 資訊圖卡：{html.escape(headline)}">
+        <button class="reel-load" type="button" data-reel-target="{archive_id}" data-facebook-url="{reel_url}" data-reel-title="{html.escape(label)}預告：{html.escape(headline)}">
           <span aria-hidden="true">▶</span> 播放影片
         </button>
       </div>
       <div class="body">
         <div class="week">{ymd}（五）06:30</div>
         <h3>{html.escape(headline)}</h3>
-        <p class="speaker">主講者：<b>{html.escape(speaker)}</b>・{html.escape(company)}</p>
+        {member_html if theme else f'<p class="speaker">主講者：<b>{html.escape(speaker)}</b>・{html.escape(company)}</p>'}
+        {fixed_note}
         <p>{html.escape(summary_text)}</p>
 {video_partner_block}
         <p class="video-note">影片由金貴分會官方粉絲團發布；若嵌入播放器無法載入，可直接前往 Facebook 觀看。</p>
@@ -958,10 +1083,10 @@ def apply_speaker_update(docs_dir: pathlib.Path, payload: dict[str, Any], today_
     # 4. Update docs/join.html
     join_path = docs_dir / "join.html"
     join_html = join_path.read_text(encoding="utf-8")
-    option_val = f"{ymd}（五）06:30｜{speaker}主講"
+    option_val = f"{ymd}（五）06:30｜{label}"
 
     new_join_html = re.sub(
-        r'<option value="\d{4}-\d{2}-\d{2}（五）06:30｜[^"]+主講"[^>]*>.*?</option>',
+        r'<option value="\d{4}-\d{2}-\d{2}（五）06:30｜[^"]+"[^>]*>.*?</option>',
         f'<option value="{html.escape(option_val)}">{html.escape(option_val)}</option>',
         join_html,
         count=1,
@@ -972,9 +1097,10 @@ def apply_speaker_update(docs_dir: pathlib.Path, payload: dict[str, Any], today_
         new_join_html,
     )
     new_join_html = re.sub(
-        r"text: 'BNI 金貴分會例會｜[^']+主講'",
-        f"text: 'BNI 金貴分會例會｜{speaker}主講'",
+        r"text: (?:'[^']*'|\"[^\"]*\")",
+        lambda _: "text: " + json.dumps("BNI 金貴分會例會｜" + label, ensure_ascii=False),
         new_join_html,
+        count=1,
     )
     new_join_html = re.sub(
         r"dates: '\d{8}T063000/\d{8}T083000'",
@@ -1002,10 +1128,17 @@ def apply_speaker_update(docs_dir: pathlib.Path, payload: dict[str, Any], today_
         new_join_html,
     )
     new_join_html = re.sub(
-        r"document\.getElementById\('g-date'\)\.value = '\d{4}-\d{2}-\d{2}（五）06:30｜[^']+主講';",
-        f"document.getElementById('g-date').value = '{option_val}';",
+        r"document\.getElementById\('g-date'\)\.value = (?:'[^']*'|\"[^\"]*\");",
+        lambda _: "document.getElementById('g-date').value = " + json.dumps(option_val, ensure_ascii=False) + ";",
         new_join_html,
     )
+    if theme:
+        if 'id="fixed-meeting-basis"' not in new_join_html:
+            new_join_html = new_join_html.replace('<div class="steps">', f'<p id="fixed-meeting-basis" class="desc">時間、地址與費用{FIXED_MEETING_NOTE}。</p>\n    <div class="steps">', 1)
+        if FIXED_MEETING_NOTE not in new_join_html.split('id="successPanel"')[-1]:
+            new_join_html = new_join_html.replace('<p><strong>固定例會：</strong>', f'<p class="field-help">時間、地址與費用{FIXED_MEETING_NOTE}。</p>\n      <p><strong>固定例會：</strong>')
+        if "details: '" + FIXED_MEETING_NOTE not in new_join_html:
+            new_join_html = new_join_html.replace("details: '", "details: '" + FIXED_MEETING_NOTE + "。", 1)
     join_path.write_text(new_join_html, encoding="utf-8")
     changes.append(f"docs/join.html: 已更新報名選項、截止時間與 Google 日曆為 {ymd} {speaker}")
 
@@ -1070,7 +1203,7 @@ def verify_site_status(
 
     # 2. Check join.html option state
     opt_m = re.search(
-        r'<option value="(\d{4}-\d{2}-\d{2})（五）06:30｜([^"]+?)主講"([^>]*)>(.*?)</option>',
+        r'<option value="(\d{4}-\d{2}-\d{2})（五）06:30｜([^"]+?)"([^>]*)>(.*?)</option>',
         join_html,
     )
     join_option_date = opt_m.group(1) if opt_m else None
@@ -1185,10 +1318,10 @@ def verify_site_status(
             else:
                 if src_payload["meeting_date"] != target_ymd:
                     upcoming_missing_reasons.append("來源日期與目標場次不符")
-                if join_option_speaker != src_payload["speaker_name"]:
+                if join_option_speaker != meeting_label(src_payload):
                     upcoming_missing_reasons.append("報名場次講者與來源回執不符")
                 for page_name, page_text in [("docs/index.html", index_html), ("docs/videos.html", videos_html)]:
-                    if src_payload["speaker_name"] not in page_text or src_payload["reel_url"] not in page_text:
+                    if any(name not in page_text for name in ([m["name"] for m in src_payload["featured_members"]] if src_payload.get("format") == "theme_day" else [src_payload["speaker_name"]])) or src_payload["reel_url"] not in page_text:
                         upcoming_missing_reasons.append(f"{page_name} 講者或 Reel 與來源回執不符")
         except Exception as exc:
             upcoming_missing_reasons.append(f"{source_receipt_file.name} 讀取失敗: {exc}")
@@ -1208,10 +1341,10 @@ def verify_site_status(
         summary_msg = "錯誤：本機網站檔案檢查或測試未通過 — " + "；".join(hygiene_errors)
     elif upcoming_speaker_updated:
         verdict = "verified_ok"
-        summary_msg = f"驗證通過：官網已完成 {target_ymd}（{join_option_speaker}）主講更新且所有本機測試通過。"
+        summary_msg = f"驗證通過：官網已完成 {target_ymd}（{join_option_speaker}）場次更新且所有本機測試通過。"
     else:
         verdict = "blocked_upcoming_speaker_not_updated"
-        src_note = latest_source_message or "Facebook 粉專需登入驗證或尚未發布下週預告"
+        src_note = latest_source_message or "尚缺經核對的下一場來源，需檢查瀏覽器與同一 Reel"
         summary_msg = (
             f"受阻：本機過期場次保護與網站測試已通過，但尚未完成下一場（{target_ymd}）主講者更新。"
             f"原因：{src_note}。依規定禁止標記排程為成功（verified_ok）。"

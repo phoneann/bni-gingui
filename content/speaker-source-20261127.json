@@ -1,0 +1,62 @@
+{
+  "format": "theme_day",
+  "title": "居家主題日",
+  "featured_members": [
+    {
+      "name": "陳令緯",
+      "company": "吾家有洗-宅淨優化",
+      "role": "負責人",
+      "evidence": {
+        "type": "video_frame",
+        "seconds": 2.2,
+        "sha256": "34c08e058ac8d833b07bd3013d58990eab73a042b0a88927c993e9eb1400bf72",
+        "reel_url": "https://www.facebook.com/reel/1065215876573624/",
+        "screenshot": "reel1065215876573624_2.2s_陳令緯字卡.png",
+        "transcription": "吾家有洗-宅淨優化｜陳令緯 負責人"
+      }
+    },
+    {
+      "name": "黃筱涵",
+      "company": "永揚清潔有限公司",
+      "role": "總經理",
+      "evidence": {
+        "type": "video_frame",
+        "seconds": 4.5,
+        "sha256": "189ececae11122d6d8a162ac4dff0fff6a3a2201668e3ef9cefa7d5d5bd4597f",
+        "reel_url": "https://www.facebook.com/reel/1065215876573624/",
+        "screenshot": "reel1065215876573624_4.5s_黃筱涵字卡.png",
+        "transcription": "永揚清潔有限公司｜黃筱涵 總經理"
+      }
+    }
+  ],
+  "meeting_date": "2026-11-27",
+  "reel_url": "https://www.facebook.com/reel/1065215876573624/",
+  "source_post_url": "https://www.facebook.com/reel/1065215876573624/",
+  "fetched_at": "2026-11-20T19:33:08+08:00",
+  "topic_paragraphs": [
+    "這支影片為 11/27 居家主題日預告。家電清洗與清潔服務夥伴分享如何跨產業互相介紹客人、創造合作機會。",
+    "如果你也是老闆，想認識不同產業、拓展合作機會，歡迎來參訪。活動資訊請以接待窗口通知為準。"
+  ],
+  "source_excerpt": "📣 11／27 金貴分會「居家主題日」！\n🤝 我們都是老闆，但我們也可以是彼此的業務員！\n自己當老闆之後，應該都知道，經營一份事業真的不容易。\n除了把自己的專業做好，有時候也需要有人幫你介紹客人、幫你多說一句話。\n今天分享的這兩位老闆，一個做家電清洗，一個做清潔服務。\n雖然做的事情不一樣，但他們可以互相介紹客人，幫彼此多創造一些機會。\n你有需要，我剛好能幫上忙；我遇到適合你的客人，也會想到你！\n就這樣互相幫忙，讓彼此的生意越做越好。\n其實就是這麼簡單！😂\n我們不用什麼都自己來，也不一定什麼事情都要自己摸索。\n有時候，多認識一個人、多幫彼此介紹一次，就可能多一個新的機會。\n而這兩位老闆的故事，也只是其中一個例子。\n不同產業之間，其實還有很多合作的可能。\n自己努力很重要，但如果還有人願意幫你一把，不是更好嗎？ 🤝\n不管你是做什麼產業的老闆，都希望你能找到適合自己的合作夥伴！\n在金貴，我們有各行各業的老闆，大家除了經營自己的事業，也可以互相介紹客人、互相幫忙。\n就像影片裡的這兩位老闆一樣，明明做不同的行業，卻也能成為彼此的業務員！\n現在我們也正在招募新夥伴！\n如果你也是老闆，或是想認識不同產業、拓展合作機會，歡迎來參訪！\n想知道不同產業的老闆怎麼互相介紹客人、創造生意機會嗎？\n11／27 歡迎來坐坐、認識大家！\n想來參訪的朋友，直接私訊我，我再把活動資訊傳給你！🤝\n#成就彼此 #互相引薦 #合作共好 #BNI金貴分會 #居家主題日 顯示較少",
+  "source_caption_sha256": "314fc4961dcf0cca1f62afccab838abf5f9dd35e3f4e2d45db84e7093b8e5562",
+  "official_fanpage_id": "100025054496051",
+  "official_post_published_at": null,
+  "date_year_basis": "官方caption寫11／27；2026-11-20本人核准本次更新，下一場2026-11-27為星期五。",
+  "schedule_basis": "官方caption未列時間地址費用；沿用站內固定會務資料，實際以接待窗口通知為準。",
+  "field_sources": {
+    "format": "官方caption整理",
+    "title": "官方caption整理",
+    "featured_members": "同一Reel影片字卡與字幕；逐人evidence含秒數與截圖SHA256",
+    "meeting_date": "官方caption；年份依date_year_basis",
+    "reel_url": "官方Reel永久連結及Claude已核作者為官方粉專",
+    "source_post_url": "官方Reel永久連結及Claude已核作者為官方粉專",
+    "fetched_at": "本站查詢台北時間",
+    "topic_paragraphs": "官方caption整理",
+    "source_excerpt": "官方caption整理",
+    "source_caption_sha256": "本站來源核對記錄；原文未提供者保留null",
+    "official_fanpage_id": "官方Reel永久連結及Claude已核作者為官方粉專",
+    "official_post_published_at": "本站來源核對記錄；原文未提供者保留null",
+    "date_year_basis": "本站來源核對記錄；原文未提供者保留null",
+    "schedule_basis": "本站來源核對記錄；原文未提供者保留null"
+  }
+}

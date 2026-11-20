@@ -66,6 +66,7 @@
   <div class="wrap">
     <div class="kicker">BEFORE YOU ARRIVE</div>
     <h2>蒞臨前，先看這 <span class="accent">4 件事</span></h2>
+    <p id="fixed-meeting-basis" class="desc">時間、地址與費用依固定會務資料，實際以接待窗口通知為準。</p>
     <div class="steps">
       <div class="step">
         <div class="n"></div>
@@ -163,7 +164,7 @@
         <label for="g-date">預計蒞臨場次 *</label>
         <select id="g-date" name="預計蒞臨場次" required>
           <option value="">請選擇已確認場次</option>
-          <option value="2026-11-20（五）06:30｜俊丞主講" disabled>2026-11-20（五）06:30｜俊丞主講（已結束報名）</option>
+          <option value="2026-11-27（五）06:30｜居家主題日">2026-11-27（五）06:30｜居家主題日</option>
           <option value="其他週五，由接待窗口協助確認">其他週五｜請接待窗口協助安排</option>
         </select>
         <small class="field-help">例會為每週五 06:30–08:30；網站只列目前已確認可報名的場次。</small>
@@ -178,6 +179,7 @@
       <div class="kicker">REGISTRATION RECEIVED</div>
       <h3>資料已送達接待窗口</h3>
       <p id="successSummary">接待夥伴會與你聯絡確認場次與座位；送出表單不代表座位已完成確認。</p>
+      <p class="field-help">時間、地址與費用依固定會務資料，實際以接待窗口通知為準。</p>
       <p><strong>固定例會：</strong>週五 06:30–08:30，建議 06:20 前抵達。</p>
       <p><strong>地點：</strong>BNI 台南菁英會所｜台南市北區文成路781-2號。</p>
       <p>若行前仍未收到確認，可致電接待窗口謝豐安 0955-468352。</p>
@@ -214,16 +216,16 @@ if (params.get('sent') === '1') {
     if (saved.date) {
       document.getElementById('successSummary').textContent = `已收到 ${saved.date} 的報名資料。接待夥伴會再與你確認場次與座位；送出表單不代表座位已完成確認。`;
     }
-    if (saved.date && saved.date.startsWith('2026-11-20')) {
+    if (saved.date && saved.date.startsWith('2026-11-27')) {
       const calendar = document.getElementById('calendarButton');
       const calendarUrl = new URL('https://calendar.google.com/calendar/render');
       calendarUrl.search = new URLSearchParams({
         action: 'TEMPLATE',
-        text: 'BNI 金貴分會例會｜俊丞主講',
-        dates: '20261120T063000/20261120T083000',
+        text: "BNI 金貴分會例會｜居家主題日",
+        dates: '20261127T063000/20261127T083000',
         ctz: 'Asia/Taipei',
         location: '台南 BNI 菁英會所｜台南市北區文成路781-2號',
-        details: '08:30 為固定例會預計結束時間，實際依現場安排。請提前10分鐘抵達，座位以接待窗口確認為準。'
+        details: '依固定會務資料，實際以接待窗口通知為準。08:30 為固定例會預計結束時間，實際依現場安排。請提前10分鐘抵達，座位以接待窗口確認為準。'
       }).toString();
       calendar.href = calendarUrl.toString();
       calendar.hidden = false;
@@ -241,15 +243,15 @@ if (params.get('sent') === '1') {
     history.replaceState(null, '', `${location.pathname}${query ? `?${query}` : ''}${location.hash}`);
   }
 }
-const featuredMeetingClosed = new Date() >= new Date('2026-11-20T06:30:00+08:00');
-const featuredOption = document.querySelector('#g-date option[value^="2026-11-20"]');
+const featuredMeetingClosed = new Date() >= new Date('2026-11-27T06:30:00+08:00');
+const featuredOption = document.querySelector('#g-date option[value^="2026-11-27"]');
 if (featuredOption) {
   featuredOption.disabled = featuredMeetingClosed;
   const baseLabel = featuredOption.value;
   featuredOption.textContent = featuredMeetingClosed ? `${baseLabel}（已結束報名）` : baseLabel;
 }
 const requestedMeeting = params.get('meeting');
-if (featuredMeetingClosed || (requestedMeeting && requestedMeeting !== '2026-11-20')) {
+if (featuredMeetingClosed || (requestedMeeting && requestedMeeting !== '2026-11-27')) {
   document.querySelector('#g-date + .field-help').textContent = '連結中的場次目前未開放報名，請選擇其他已確認場次，或由接待窗口協助安排。';
 }
 const invitedBy = params.get('invited_by');
@@ -261,8 +263,8 @@ if (invitedBy) {
 if (params.get('source') === 'directory_no_result') {
   document.getElementById('g-source').value = '會員名錄：搜尋無結果';
 }
-if (requestedMeeting === '2026-11-20' && !featuredMeetingClosed) {
-  document.getElementById('g-date').value = '2026-11-20（五）06:30｜俊丞主講';
+if (requestedMeeting === '2026-11-27' && !featuredMeetingClosed) {
+  document.getElementById('g-date').value = "2026-11-27（五）06:30｜居家主題日";
 }
 const guestForm = document.getElementById('guestForm');
 let formStarted = false;

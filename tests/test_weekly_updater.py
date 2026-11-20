@@ -77,7 +77,7 @@ class GinguiWeeklyUpdaterTests(unittest.TestCase):
                 ))
                 result = json.loads((pathlib.Path(tmp) / "latest-source-check.json").read_text())
         self.assertNotEqual(rc, 0)
-        self.assertEqual(result["status"], "blocked_source_format")
+        self.assertEqual(result["status"], "caption_incomplete_video_unchecked")
 
     def test_compute_target_friday(self) -> None:
         # Friday 06:00 (before meeting start) -> same day Friday
@@ -125,7 +125,7 @@ class GinguiWeeklyUpdaterTests(unittest.TestCase):
             content_copy.mkdir(parents=True, exist_ok=True)
 
             ref_dt = datetime.datetime.fromisoformat("2026-11-09T10:00:00+08:00")
-            target_friday = datetime.date(2026, 11, 27)
+            target_friday = datetime.date(2026, 12, 4)
 
             # 1. Verify close_expired state passes local hygiene but DOES NOT pass upcoming_speaker_updated
             updater.apply_close_expired(docs_copy, "2026-11-09")
@@ -142,7 +142,7 @@ class GinguiWeeklyUpdaterTests(unittest.TestCase):
 
             # 2. Apply verified next-week speaker update in isolated temp docs_copy
             sample_1127 = {
-                "meeting_date": "2026-11-27",
+                "meeting_date": "2026-12-04",
                 "speaker_name": "範例講者",
                 "profession": "企業管理顧問業代表",
                 "company": "金貴範例顧問有限公司",
@@ -157,14 +157,14 @@ class GinguiWeeklyUpdaterTests(unittest.TestCase):
                 "source_post_url": "https://www.facebook.com/reel/999888777666555/",
                 "fetched_at": "2026-11-09T10:00:00+08:00",
             }
-            (content_copy / "speaker-source-20261127.json").write_text(
+            (content_copy / "speaker-source-20261204.json").write_text(
                 json.dumps(sample_1127, ensure_ascii=False, indent=2),
                 encoding="utf-8",
             )
             updater.apply_speaker_update(docs_copy, sample_1127, "2026-11-20")
 
             # Verify SVG, index.html, videos.html, join.html, and sitemap.xml
-            self.assertTrue((docs_copy / "assets/photos/focus-20261127.svg").exists())
+            self.assertTrue((docs_copy / "assets/photos/focus-20261204.svg").exists())
             status_updated = updater.verify_site_status(
                 docs_dir=docs_copy,
                 content_dir=content_copy,
@@ -178,7 +178,7 @@ class GinguiWeeklyUpdaterTests(unittest.TestCase):
 
             # A valid-shaped receipt for another speaker must not turn a stale site green.
             sample_1127["speaker_name"] = "另一位講者"
-            (content_copy / "speaker-source-20261127.json").write_text(
+            (content_copy / "speaker-source-20261204.json").write_text(
                 json.dumps(sample_1127, ensure_ascii=False), encoding="utf-8",
             )
             mismatch = updater.verify_site_status(
@@ -187,6 +187,86 @@ class GinguiWeeklyUpdaterTests(unittest.TestCase):
             )
             self.assertFalse(mismatch["upcoming_speaker_updated"])
             self.assertTrue(any("講者與來源回執不符" in reason for reason in mismatch["upcoming_missing_reasons"]))
+
+    def theme_source(self):
+        return json.loads((REPO_ROOT / "content/speaker-source-20261127.json").read_text())
+
+    def test_theme_caption_and_frame_receipts_validate(self):
+        source = self.theme_source()
+        made = updater.build_theme_day_source(source["source_excerpt"], source["featured_members"],
+            datetime.date(2026, 11, 27), source["reel_url"], source["fetched_at"], source["topic_paragraphs"])
+        self.assertEqual(updater.validate_source_payload(made), [])
+        self.assertEqual([m["name"] for m in made["featured_members"]], ["陳令緯", "黃筱涵"])
+
+    def test_theme_cannot_borrow_adjacent_december_4_post(self):
+        source = self.theme_source()
+        with self.assertRaises(ValueError):
+            updater.build_theme_day_source(source["source_excerpt"] + "\n12/4 主講人｜陳宏億 公司｜別家公司",
+                source["featured_members"], datetime.date(2026, 11, 27), source["reel_url"], source["fetched_at"], source["topic_paragraphs"])
+        source["featured_members"][1]["evidence"]["reel_url"] = "https://www.facebook.com/reel/2056461168385443/"
+        self.assertTrue(updater.validate_source_payload(source))
+
+    def test_theme_missing_or_invalid_evidence_blocks_update(self):
+        for evidence in (None, {}, {"type":"video_frame", "seconds":4.5, "sha256":"bad", "reel_url":"https://www.facebook.com/reel/1065215876573624/"}):
+            source = self.theme_source()
+            source["featured_members"][0]["evidence"] = evidence
+            self.assertTrue(updater.validate_source_payload(source))
+            with tempfile.TemporaryDirectory() as tmp:
+                with self.assertRaises(ValueError):
+                    updater.apply_speaker_update(pathlib.Path(tmp), source, "2026-11-20")
+
+    def test_caption_evidence_must_contain_member_fields(self):
+        source = self.theme_source()
+        member = source["featured_members"][0]
+        member["evidence"] = {"type":"caption", "reel_url":source["reel_url"], "excerpt":"今天分享的這兩位老闆"}
+        self.assertTrue(updater.validate_source_payload(source))
+        excerpt = member["name"] + member["company"] + member["role"]
+        source["source_excerpt"] += "\n" + excerpt
+        member["evidence"]["excerpt"] = excerpt
+        self.assertEqual(updater.validate_source_payload(source), [])
+
+    def test_source_status_classification(self):
+        target = datetime.date(2026, 11, 27)
+        base = {"checked":True, "found_tab":True}
+        cases = [({}, "not_checked_http_only"),
+            ({"checked":False, "error":"timeout"}, "browser_unreadable"),
+            ({**base, "js_error":"disabled"}, "browser_unreadable"),
+            ({**base, "body_excerpt":"登入以繼續", "url":"https://www.facebook.com/login/"}, "login_required"),
+            ({**base, "body_excerpt":"金貴最新公告 12/4"}, "source_not_announced"),
+            ({**base, "body_excerpt":"11／27 居家主題日"}, "caption_incomplete_video_unchecked"),
+            ({**base, "body_excerpt":"11／27 居家主題日", "video_checked":True}, "parser_unsupported_format")]
+        for info, expected in cases:
+            with self.subTest(expected=expected):
+                self.assertEqual(updater.classify_source_status(info, target), expected)
+
+    def test_http_only_is_never_login_required(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(updater, "CONTENT_DIR", pathlib.Path(tmp)), mock.patch.object(updater, "fetch_http_url", return_value={"ok":False, "login_wall_detected":True}):
+            self.assertEqual(updater.cmd_fetch_source(argparse.Namespace(now="2026-11-20T19:00:00+08:00", target_friday="2026-11-27", check_open_chrome=False)), 2)
+            self.assertEqual(json.loads((pathlib.Path(tmp)/"latest-source-check.json").read_text())["status"], "not_checked_http_only")
+
+    def test_theme_update_preserves_archive_and_is_idempotent(self):
+        import re
+        with tempfile.TemporaryDirectory() as tmp:
+            docs = pathlib.Path(tmp)/"docs"
+            shutil.copytree(REPO_ROOT/"docs", docs)
+            source = self.theme_source()
+            reels_before = set(re.findall(r"facebook.com/reel/([0-9]+)", (docs/"videos.html").read_text()))
+            updater.apply_speaker_update(docs, source, "2026-11-20")
+            first = {name:(docs/name).read_bytes() for name in ("index.html","join.html","videos.html","assets/photos/focus-20261127.svg")}
+            updater.apply_speaker_update(docs, source, "2026-11-20")
+            self.assertEqual(first, {name:(docs/name).read_bytes() for name in first})
+            self.assertTrue(reels_before.issubset(set(re.findall(r"facebook.com/reel/([0-9]+)", (docs/"videos.html").read_text()))))
+            content = docs/"../content"; content.mkdir()
+            (content/"speaker-source-20261127.json").write_text(json.dumps(source))
+            verified = updater.verify_site_status(docs, content, updater.now_tpe(), datetime.date(2026,11,27), False)
+            self.assertTrue(verified["upcoming_speaker_updated"], verified)
+            for name in ("index.html", "videos.html"):
+                text = (docs/name).read_text()
+                section = text.split('2026-11-27（五）06:30')[1].split('</article>')[0] if name=="videos.html" else text.split('<section class="focus-strip">')[1].split('</section>')[0]
+                self.assertIn("陳令緯", section)
+                self.assertIn("黃筱涵", section)
+                self.assertNotIn("主講者", section)
+                self.assertNotIn("陳宏億", section)
 
 
 if __name__ == "__main__":

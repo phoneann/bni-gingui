@@ -3,10 +3,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
-const html = fs.readFileSync(path.join(__dirname, '../docs/join.html'), 'utf8');
+const html = fs.readFileSync(process.argv[2] || path.join(__dirname, '../docs/join.html'), 'utf8');
 const script = html.match(/<script>\s*(const params = new URLSearchParams\(location\.search\);[\s\S]*?)<\/script>/)?.[1];
 assert.ok(script, 'join form script exists');
-const optMatch = html.match(/<option value="((\d{4}-\d{2}-\d{2})（五）06:30｜[^"]+主講)"/);
+const optMatch = html.match(/<option value="((\d{4}-\d{2}-\d{2})（五）06:30｜[^"]+)"/);
 assert.ok(optMatch, 'featured meeting option exists');
 const activeOptionValue = optMatch[1];
 const activeDate = optMatch[2];
@@ -114,3 +114,16 @@ assert.equal(postCutoff.element('g-date').value, '');
 assert.match(postCutoff.element('#g-date + .field-help').textContent, /未開放報名/);
 
 console.log('join success guard: all scenarios passed');
+
+const oldLink = run('?meeting=2026-11-20');
+assert.equal(oldLink.element('g-date').value, '');
+assert.match(oldLink.element('#g-date + .field-help').textContent, /未開放報名/);
+const cal = new URL(redirected.element('calendarButton').href);
+assert.equal(cal.searchParams.get('dates'), `${activeDate.replaceAll('-', '')}T063000/${activeDate.replaceAll('-', '')}T083000`);
+assert.equal(cal.searchParams.get('ctz'), 'Asia/Taipei');
+if (activeOptionValue.includes('主題日')) {
+  assert.match(cal.searchParams.get('text'), /居家主題日/);
+  assert.doesNotMatch(cal.searchParams.get('text'), /主講/);
+  assert.match(cal.searchParams.get('details'), /依固定會務資料，實際以接待窗口通知為準/);
+}
+console.log('old deep link, selected date and calendar: all scenarios passed');
