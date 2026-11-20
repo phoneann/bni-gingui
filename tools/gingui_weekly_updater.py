@@ -722,13 +722,16 @@ def render_theme_focus_svg(payload: dict[str, Any]) -> str:
     e = html.escape
     members = payload["featured_members"]
     blocks = []
-    step = min(260, 660 / len(members))
-    size = min(64, step / 3)
+    # Reserve y=640..880 for the centered Reel button. The first member
+    # sits above it; remaining members share the space before the footer.
+    lower_step = 264 / max(len(members) - 1, 1)
+    size = min(64, lower_step / 2.5)
+    company_gap = size * 14 / 64
     for i, member in enumerate(members):
-        y = 650 + i * step
-        company_size = min(32, 900 / max(len(member["company"]), 1))
+        y = 550 if i == 0 else 896 + size + (i - 1) * lower_step
+        company_size = min(32, size / 2, 900 / max(len(member["company"]), 1))
         blocks.append(f'<text x="78" y="{y}" fill="#f1dfba" font-size="{size}" font-weight="800">{e(member["name"])} · {e(member.get("role") or member["profession"])}</text>'
-                      f'<text x="78" y="{y + size + 14}" fill="#d3b783" font-size="{company_size}">{e(member["company"])}</text>')
+                      f'<text x="78" y="{y + size + company_gap}" fill="#d3b783" font-size="{company_size}">{e(member["company"])}</text>')
     return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1076 1522" role="img" lang="zh-Hant" aria-labelledby="title desc">
 <title id="title">{format_month_day(d)} {e(payload["title"])}｜分享夥伴</title>
 <desc id="desc">{'；'.join(e(m['name']+' '+m['company']+' '+(m.get('role') or m['profession'])) for m in members)}。{FIXED_MEETING_NOTE}。</desc>
@@ -736,10 +739,10 @@ def render_theme_focus_svg(payload: dict[str, Any]) -> str:
 <rect x="35" y="35" width="1006" height="1452" rx="16" fill="none" stroke="#a47c4c" stroke-width="2"/>
 <g font-family="Noto Sans TC, sans-serif">
 <text x="78" y="116" fill="#f2e5c9" font-size="32" letter-spacing="8">BNI 台南市區 · 金貴分會</text>
-<text x="78" y="260" fill="#d5b888" font-size="100" font-weight="900">{format_month_day_padded(d)}</text>
-<text x="78" y="365" fill="#fff" font-size="70" font-weight="900">{e(payload['title'])}</text>
-<rect x="78" y="415" width="920" height="100" rx="12" fill="#8b2530"/>
-<text x="110" y="480" fill="#fff" font-size="42">{e(payload["title"])}｜分享夥伴</text>
+<text x="78" y="240" fill="#d5b888" font-size="100" font-weight="900">{format_month_day_padded(d)}</text>
+<text x="78" y="340" fill="#fff" font-size="70" font-weight="900">{e(payload['title'])}</text>
+<rect x="78" y="370" width="920" height="100" rx="12" fill="#8b2530"/>
+<text x="110" y="435" fill="#fff" font-size="42">{e(payload["title"])}｜分享夥伴</text>
 {''.join(blocks)}
 <text x="78" y="1200" fill="#d5b888" font-size="35">星期五 · 上午 06:30</text>
 <text x="78" y="1260" fill="#f2e5c9" font-size="32">台南 BNI 菁英會所 · NT$400 含早餐</text>

@@ -11,6 +11,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+import xml.etree.ElementTree as ET
 from unittest import mock
 import argparse
 
@@ -190,6 +191,41 @@ class GinguiWeeklyUpdaterTests(unittest.TestCase):
 
     def theme_source(self):
         return json.loads((REPO_ROOT / "content/speaker-source-20261127.json").read_text())
+
+    def test_theme_svg_keeps_play_button_band_clear(self):
+        for count in (1, 2, 3, 6):
+            with self.subTest(members=count):
+                source = self.theme_source()
+                source["featured_members"] = [
+                    {**source["featured_members"][i % 2], "name": f"成員{i + 1}"}
+                    for i in range(count)
+                ]
+                root = ET.fromstring(updater.render_focus_svg(source))
+                texts = root.findall(".//{http://www.w3.org/2000/svg}text")
+                self.assertEqual(len(texts), 9 + 2 * count)
+                for text in texts:
+                    y = float(text.attrib["y"])
+                    size = float(text.attrib["font-size"])
+                    self.assertFalse(640 <= y <= 880, text.text)
+                    # Conservative glyph bounds: full em ascent, 0.2 em descent.
+                    self.assertTrue(y + 0.2 * size < 640 or y - size > 880, text.text)
+                members = texts[4:-5]
+                self.assertTrue(all(float(t.attrib["y"]) < 640 for t in members[:2]))
+                self.assertTrue(all(float(t.attrib["y"]) > 880 for t in members[2:]))
+                # Each member line stays separate and above the meeting footer.
+                for current, following in zip(members, members[1:] + texts[-5:-4]):
+                    bottom = float(current.attrib["y"]) + 0.2 * float(current.attrib["font-size"])
+                    top = float(following.attrib["y"]) - float(following.attrib["font-size"])
+                    self.assertLess(bottom, top)
+
+    def test_single_speaker_svg_matches_pre_fix_golden(self):
+        for date in ("20261106", "20261113", "20261120"):
+            with self.subTest(date=date):
+                source = json.loads((REPO_ROOT / f"content/speaker-source-{date}.json").read_text())
+                golden = (REPO_ROOT / f"tests/fixtures/focus-single-{date}.svg").read_text()
+                self.assertEqual(updater.render_focus_svg(source), golden)
+                source["format"] = "single_speaker"
+                self.assertEqual(updater.render_focus_svg(source), golden)
 
     def test_theme_caption_and_frame_receipts_validate(self):
         source = self.theme_source()
